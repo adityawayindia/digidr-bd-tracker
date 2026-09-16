@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DigiDr — BD Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/css/intlTelInput.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'DM Sans',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    font-size:16px;
+    color:#1E293B;
+    min-height:100vh;
+    background-color:#FFFFFF;
+  }
+
+  /* ---------- Aurora background ---------- */
+  .hero-aurora{
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    overflow:hidden;
+    pointer-events:none;
+    background:linear-gradient(115deg,
+      rgba(3,96,217,0.14) 0%,
+      rgba(237,147,12,0.14) 35%,
+      rgba(3,96,217,0.14) 70%,
+      rgba(237,147,12,0.14) 100%);
+    background-size:320% 320%;
+    animation:hero-aurora-gradient 12s ease-in-out infinite;
+  }
+  @keyframes hero-aurora-gradient{
+    0%,100%{background-position:0% 40%;}
+    33%{background-position:50% 60%;}
+    66%{background-position:100% 30%;}
+  }
+
+  /* ---------- Header ---------- */
+  header.app{
+    position:relative;
+    z-index:2;
+    background:rgba(255,255,255,0.85);
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+    border-bottom:1px solid rgba(203,213,225,0.6);
+    padding:18px 24px 16px;
+  }
+  header.app h1{
+    font-size:22px;
+    font-weight:700;
+    color:#0C3B5E;
+    margin-bottom:2px;
+    text-align:center;
+  }
+  header.app p{
+    font-size:14px;
+    color:#475569;
+    text-align:center;
+  }
+
+  nav.tabs{
+    position:relative;
+    z-index:2;
+    display:flex;
+    justify-content:center;
+    gap:2px;
+    background:rgba(248,250,252,0.9);
+    border-bottom:1px solid #E2E8F0;
+    overflow-x:auto;
+  }
+  nav.tabs button{
+    font-family:inherit;
+    font-size:14px;
+    font-weight:700;
+    padding:13px 18px;
+    background:none;
+    border:none;
+    cursor:pointer;
+    color:#475569;
+    white-space:nowrap;
+    border-bottom:3px solid transparent;
+    transition:color 0.2s ease, border-color 0.2s ease;
+  }
+  nav.tabs button:hover{color:#0E65D7;}
+  nav.tabs button.active{
+    color:#0E65D7;
+    border-bottom-color:#0E65D7;
+  }
+
+  main{
+    position:relative;
+    z-index:2;
+    max-width:920px;
+    margin:0 auto;
+    padding:24px 20px 80px;
+  }
+  .view{display:none;}
+  .view.active{display:block;}
+
+  h2.section-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:14px;
+    font-weight:700;
+    color:#0C3B5E;
+    letter-spacing:0.4px;
+    text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  h2.section-title i{color:#0E65D7;}
+  h3.big{
+    font-size:26px;
+    font-weight:700;
+    color:#0C3B5E;
+    margin-bottom:18px;
+  }
+
+  .bd-strip{
+    background:rgba(255,255,255,0.92);
+    backdrop-filter:blur(16px);
+    border:1px solid rgba(255,255,255,0.6);
+    border-radius:16px;
+    padding:14px 18px;
+    margin-bottom:22px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    align-items:center;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+  }
+  .bd-strip .who{font-size:14px;color:#475569;}
+  .bd-strip .who strong{color:#0C3B5E;font-size:15px;}
+  .bd-strip button{
+    margin-left:auto;
+    background:none;
+    border:1.5px solid #CBD5E1;
+    padding:7px 14px;
+    font-size:14px;
+    font-weight:700;
+    font-family:inherit;
+    cursor:pointer;
+    border-radius:10px;
+    color:#0E65D7;
+    transition:all 0.2s ease;
+  }
+  .bd-strip button:hover{border-color:#0E65D7;background:#EFF6FF;}
+
+  .card{
+    background:rgba(255,255,255,0.92);
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+    border:1px solid rgba(255,255,255,0.6);
+    border-radius:20px;
+    padding:22px;
+    margin-bottom:18px;
+    box-shadow:0 20px 40px rgba(0,0,0,0.08), 0 1px 3px rgba(255,255,255,0.3) inset;
+  }
+
+  label{
+    display:block;
+    font-size:14px;
+    font-weight:600;
+    color:#334155;
+    margin:14px 0 6px;
+  }
+  label:first-child{margin-top:0;}
+
+  input, select, textarea{
+    width:100%;
+    padding:10px 14px;
+    font-family:inherit;
+    font-size:16px;
+    color:#0F172A;
+    background-color:#F8FAFC;
+    border:1.5px solid #CBD5E1;
+    border-radius:12px;
+    outline:none;
+    transition:all 0.25s ease;
+  }
+  select{
+    appearance:none;
+    -webkit-appearance:none;
+    -moz-appearance:none;
+    cursor:pointer;
+    background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat:no-repeat;
+    background-position:right 12px center;
+    background-size:16px;
+    padding-right:38px;
+  }
+  textarea{min-height:64px;resize:vertical;}
+  input:focus, select:focus, textarea:focus{
+    background-color:#FFFFFF;
+    border-color:#0E65D7;
+    box-shadow:0 0 0 4px rgba(14,101,215,0.12);
+  }
+  input.error, select.error, textarea.error{
+    border-color:#DC2626;
+    background-color:#FEF2F2;
+  }
+  input.error:focus, select.error:focus, textarea.error:focus{
+    box-shadow:0 0 0 4px rgba(220,38,38,0.12);
+  }
+  .field-error-msg{
+    display:none;
+    font-size:13px;
+    color:#DC2626;
+    margin-top:6px;
+    font-weight:500;
+  }
+  .field-error-msg.show{display:block;}
+
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;}
+  @media (max-width:600px){.row2{grid-template-columns:1fr;}}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:14px 0;}
+  @media (max-width:760px){.row3{grid-template-columns:1fr;}}
+  .row2:first-child, .row3:first-child{margin-top:0;}
+  .row3 label, .row2 label{margin-top:0;}
+
+  /* intl-tel-input */
+  .iti{width:100%;}
+  .iti__country-list{
+    border-radius:12px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.15);
+    border:1px solid #E2E8F0;
+    max-height:200px;
+    z-index:60;
+  }
+
+  .btn{
+    font-family:inherit;
+    font-weight:700;
+    font-size:15px;
+    padding:11px 20px;
+    border-radius:12px;
+    border:none;
+    cursor:pointer;
+    background:#0E65D7;
+    color:#fff;
+    box-shadow:0 8px 20px rgba(14,101,215,0.3);
+    transition:all 0.2s ease;
+  }
+  .btn:hover{background:#0C58BE;transform:translateY(-1px);}
+  .btn:active{transform:translateY(0);}
+  .btn.ghost{
+    background:none;
+    border:1.5px solid #CBD5E1;
+    color:#475569;
+    box-shadow:none;
+  }
+  .btn.ghost:hover{border-color:#0E65D7;color:#0E65D7;background:#EFF6FF;}
+  .btn.small{padding:7px 13px;font-size:13px;border-radius:9px;}
+  .btn.clay{background:#ED930C;box-shadow:0 8px 20px rgba(237,147,12,0.3);}
+  .btn.clay:hover{background:#D9820A;}
+  .btn:disabled{background:#E2E8F0;color:#475569;cursor:not-allowed;box-shadow:none;transform:none;}
+
+  /* dashboard */
+  .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+  @media (max-width:600px){.stat-row{grid-template-columns:1fr 1fr;}}
+  .stat{
+    background:rgba(255,255,255,0.92);
+    backdrop-filter:blur(16px);
+    border:1px solid rgba(255,255,255,0.6);
+    border-left:4px solid #0E65D7;
+    border-radius:16px;
+    padding:16px 18px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.06);
+  }
+  .stat .num{font-size:28px;font-weight:700;color:#0C3B5E;}
+  .stat .lbl{font-size:12.5px;color:#475569;text-transform:uppercase;letter-spacing:0.4px;font-weight:600;margin-top:2px;}
+
+  .followup-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    padding:12px 0;
+    border-bottom:1px solid #E2E8F0;
+  }
+  .followup-item:last-child{border-bottom:none;}
+  .followup-item .fi-name{font-size:16px;font-weight:600;color:#0F172A;}
+  .followup-item .fi-meta{font-size:14px;color:#475569;margin-top:2px;}
+  .overdue{color:#DC2626;font-weight:700;}
+
+  /* doctor list */
+  .doc-card{
+    background:rgba(255,255,255,0.92);
+    backdrop-filter:blur(16px);
+    border:1px solid rgba(255,255,255,0.6);
+    border-radius:16px;
+    padding:18px;
+    margin-bottom:12px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.06);
+  }
+  .doc-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  .doc-name{font-size:17px;font-weight:700;color:#0C3B5E;}
+  .doc-badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+  .doc-dept{
+    display:inline-block;
+    font-size:12px;
+    font-weight:700;
+    color:#0E65D7;
+    background:#EFF6FF;
+    padding:4px 10px;
+    border-radius:20px;
+    line-height:1.3;
+  }
+  .doc-dept.tag-sheet{color:#475569;background:#F1F5F9;}
+  .doc-details{
+    font-size:14px;
+    color:#475569;
+    margin-top:12px;
+    line-height:1.8;
+  }
+  .status-pill{
+    font-size:12px;
+    font-weight:700;
+    padding:5px 12px;
+    border-radius:20px;
+    white-space:nowrap;
+    line-height:1.3;
+  }
+  .status-New{background:#FFF7ED;color:#C2620A;}
+  .status-Contacted{background:#EFF6FF;color:#0E65D7;}
+  .status-Onboarded{background:#ECFDF5;color:#0F9D58;}
+  .status-Not-Interested{background:#FEF2F2;color:#DC2626;}
+  .doc-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+  .doc-actions select{width:auto;padding:7px 10px;font-size:13px;border-radius:9px;}
+  .doc-remarks{
+    margin-top:12px;
+    font-size:14px;
+    font-style:italic;
+    color:#334155;
+    background:#F8FAFC;
+    padding:10px 14px;
+    border-left:3px solid #ED930C;
+    border-radius:0 8px 8px 0;
+    line-height:1.5;
+  }
+
+  .empty{
+    color:#475569;
+    font-size:14px;
+    padding:30px 10px;
+    text-align:center;
+    border:1.5px dashed #CBD5E1;
+    border-radius:14px;
+  }
+
+  .about-block{margin-bottom:20px;}
+  .about-block h4{
+    font-size:15px;
+    font-weight:700;
+    color:#0E65D7;
+    margin-bottom:6px;
+  }
+  .about-block p{margin-bottom:10px;line-height:1.6;font-size:16px;color:#334155;}
+  .steps{counter-reset:step;list-style:none;padding:0;margin:0;}
+  .steps li{
+    counter-increment:step;
+    padding:10px 0 10px 34px;
+    position:relative;
+    border-bottom:1px solid #E2E8F0;
+    font-size:15px;
+    line-height:1.5;
+    color:#334155;
+  }
+  .steps li:last-child{border-bottom:none;}
+  .steps li::before{
+    content:counter(step);
+    position:absolute;
+    left:0;
+    top:9px;
+    width:22px;height:22px;
+    border-radius:50%;
+    background:#0E65D7;
+    color:#fff;
+    font-size:12px;
+    font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .placeholder-text{color:#475569;font-style:italic;}
+  .time-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:#0E65D7;
+    color:#fff;
+    font-weight:700;
+    font-size:14px;
+    padding:8px 16px;
+    border-radius:20px;
+    margin-top:8px;
+    box-shadow:0 8px 20px rgba(14,101,215,0.3);
+  }
+
+  /* call register */
+  .call-item{
+    padding:12px 0;
+    border-bottom:1px solid #E2E8F0;
+    font-size:14px;
+  }
+  .call-item:last-child{border-bottom:none;}
+  .call-item .call-top{display:flex;justify-content:space-between;color:#475569;font-size:13px;margin-bottom:3px;}
+  .call-item .call-doc{font-size:16px;font-weight:700;color:#0C3B5E;}
+  /* sheet log */
+  .sheet-entry{
+    background:#F8FAFC;
+    border:1px solid #E2E8F0;
+    border-radius:14px;
+    margin-bottom:10px;
+    overflow:hidden;
+  }
+  .sheet-entry:last-child{margin-bottom:0;}
+  .sheet-entry-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:14px;
+    padding:14px 16px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .sheet-entry-top:hover{background:#EFF6FF;}
+  .sheet-entry-top-left{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+  }
+  .sheet-entry-chevron{
+    color:#475569;
+    font-size:13px;
+    flex:none;
+    transition:transform 0.2s ease;
+  }
+  .sheet-entry.open .sheet-entry-chevron{transform:rotate(90deg);}
+  .sheet-entry-name{font-size:16px;font-weight:700;color:#0C3B5E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .sheet-entry-preview{font-size:14px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .sheet-entry-time{font-size:13px;color:#475569;white-space:nowrap;flex:none;}
+  .sheet-entry-body{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height 0.25s ease;
+  }
+  .sheet-entry.open .sheet-entry-body{max-height:600px;}
+  .sheet-entry-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px 24px;
+    padding:0 16px 16px;
+    border-top:1px solid #E2E8F0;
+    padding-top:14px;
+  }
+  @media (max-width:560px){.sheet-entry-grid{grid-template-columns:1fr;}}
+  .sheet-entry-field{font-size:16px;line-height:1.5;}
+  .sheet-entry-field .k{color:#475569;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:0.3px;display:block;margin-bottom:2px;}
+  .sheet-entry-field .v{color:#0F172A;}
+  .sheet-entry-field.full{grid-column:1 / -1;}
+  .sheet-status-tag{
+    display:inline-block;
+    font-size:13px;font-weight:700;padding:3px 11px;border-radius:20px;
+    background:#EFF6FF;color:#0E65D7;
+  }
+
+  .outcome-tag{
+    font-size:12px;font-weight:700;padding:3px 9px;border-radius:20px;
+    background:#FFF7ED;color:#C2620A;
+    white-space:nowrap;
+  }
+
+  .modal-bg{
+    display:none;
+    position:fixed;inset:0;
+    background:rgba(12,59,94,0.45);
+    backdrop-filter:blur(2px);
+    z-index:50;
+    align-items:center;justify-content:center;
+    padding:20px;
+  }
+  .modal-bg.active{display:flex;}
+  .modal{
+    background:#fff;
+    border-radius:20px;
+    padding:26px;
+    max-width:420px;
+    width:100%;
+    max-height:85vh;
+    overflow-y:auto;
+    box-shadow:0 25px 60px rgba(0,0,0,0.3);
+    animation:cardFadeUp 0.35s cubic-bezier(0.16,1,0.3,1);
+  }
+  @keyframes cardFadeUp{
+    from{opacity:0;transform:translateY(18px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+  .modal h3{margin-bottom:6px;font-size:19px;font-weight:700;color:#0C3B5E;}
+  .modal p{font-size:14px;color:#475569;margin-bottom:4px;}
+
+  .toast{
+    position:fixed;
+    bottom:24px;left:50%;
+    transform:translateX(-50%);
+    background:#0C3B5E;
+    color:#fff;
+    padding:11px 22px;
+    border-radius:20px;
+    font-size:14px;
+    font-weight:600;
+    display:none;
+    z-index:60;
+    box-shadow:0 10px 30px rgba(0,0,0,0.25);
+  }
+</style>
+</head>
+<body>
+
+<div class="hero-aurora" aria-hidden="true"></div>
+
+<header class="app">
+  <h1>DigiDr — Business Development Tracker</h1>
+  <p>Doctor onboarding, follow-ups &amp; daily call register</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-view="dashboard">Today</button>
+  <button class="tab-btn" data-view="addDoctor">Add Doctor</button>
+  <button class="tab-btn" data-view="doctors">Doctor List</button>
+  <button class="tab-btn" data-view="calls">Call Register</button>
+  <button class="tab-btn" data-view="sheet">Sheet Log</button>
+  <button class="tab-btn" data-view="about">About DigiDr</button>
+</nav>
+
+<main>
+
+  <div class="bd-strip" id="bdStrip"></div>
+
+  <!-- DASHBOARD -->
+  <div class="view active" id="view-dashboard">
+    <h2 class="section-title"><i class="fa-solid fa-calendar-day"></i> TODAY</h2>
+    <h3 class="big" id="dashDate">—</h3>
+
+    <div class="stat-row">
+      <div class="stat"><div class="num" id="statTotal">0</div><div class="lbl">Doctors added</div></div>
+      <div class="stat"><div class="num" id="statOnboarded">0</div><div class="lbl">Onboarded</div></div>
+      <div class="stat"><div class="num" id="statDue">0</div><div class="lbl">Follow-ups due today</div></div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title"><i class="fa-solid fa-phone"></i> FOLLOW-UPS DUE TODAY / OVERDUE</h2>
+      <div id="dueList"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title"><i class="fa-solid fa-list-check"></i> TOMORROW'S PLAN</h2>
+      <div id="tomorrowList"></div>
+      <label>Add a note to tomorrow's plan</label>
+      <textarea id="planNote" placeholder="e.g. Call Dr. Mehta again after 11am, she asked us to try later"></textarea>
+      <button class="btn small" style="margin-top:10px;" onclick="addPlanNote()">Add to plan</button>
+    </div>
+  </div>
+
+  <!-- ADD DOCTOR -->
+  <div class="view" id="view-addDoctor">
+    <h2 class="section-title"><i class="fa-solid fa-user-plus"></i> NEW LEAD</h2>
+    <h3 class="big">Add a doctor</h3>
+    <div class="card">
+      <div class="row3">
+        <div>
+          <label>Doctor's name *</label>
+          <input id="f_name" placeholder="Dr. Ananya Rao">
+        </div>
+        <div>
+          <label>Email ID</label>
+          <input id="f_email" type="email" placeholder="doctor@clinic.com">
+          <span class="field-error-msg" id="f_email_err">Enter a valid email address.</span>
+        </div>
+        <div>
+          <label>Mobile number</label>
+          <input id="f_mobile" type="tel">
+          <span class="field-error-msg" id="f_mobile_err">Enter a valid phone number.</span>
+        </div>
+      </div>
+
+      <div class="row3">
+        <div>
+          <label>Department / Speciality</label>
+          <select id="f_dept">
+            <option>Cardiology</option>
+            <option>Dentistry</option>
+            <option>Urology</option>
+            <option>Dermatology</option>
+            <option>Orthopedics</option>
+            <option>Pediatrics</option>
+            <option>Gynecology</option>
+            <option>ENT</option>
+            <option>General Physician</option>
+            <option>Neurology</option>
+            <option>Psychiatry</option>
+            <option>Ophthalmology</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div>
+          <label>Onboarding status</label>
+          <select id="f_status">
+            <option>New</option>
+            <option>Contacted</option>
+            <option>Onboarded</option>
+            <option>Not Interested</option>
+          </select>
+        </div>
+        <div>
+          <label>Next follow-up date</label>
+          <input id="f_followup" type="date">
+        </div>
+      </div>
+
+      <label>Remarks</label>
+      <textarea id="f_remarks" placeholder="Notes from the call, best time to reach, objections, interest level..."></textarea>
+
+      <button class="btn" style="margin-top:16px;" onclick="saveDoctor()">Save doctor</button>
+    </div>
+  </div>
+
+  <!-- DOCTOR LIST -->
+  <div class="view" id="view-doctors">
+    <h2 class="section-title"><i class="fa-solid fa-address-book"></i> ALL LEADS</h2>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px;">
+      <h3 class="big" style="margin-bottom:6px;">Doctor list</h3>
+      <button class="btn small ghost" onclick="refreshDoctorList()">Refresh</button>
+    </div>
+    <p style="font-size:13px;color:#475569;margin-top:-6px;margin-bottom:16px;">Combines leads added here with entries submitted to the shared sheet.</p>
+    <input id="searchDoc" placeholder="Search by name or department..." style="margin-bottom:16px;" oninput="renderDoctors()">
+    <div id="doctorList"></div>
+  </div>
+
+  <!-- CALL REGISTER -->
+  <div class="view" id="view-calls">
+    <h2 class="section-title"><i class="fa-solid fa-phone-volume"></i> LOG</h2>
+    <h3 class="big">Daily call register</h3>
+
+    <div class="card">
+      <label>Doctor called</label>
+      <select id="c_doctor"></select>
+      <div class="row2">
+        <div>
+          <label>Outcome</label>
+          <select id="c_outcome">
+            <option>Connected — interested</option>
+            <option>Connected — not interested</option>
+            <option>Connected — needs follow-up</option>
+            <option>No answer</option>
+            <option>Number invalid / switched off</option>
+            <option>Onboarding completed</option>
+          </select>
+        </div>
+        <div>
+          <label>Next action date</label>
+          <input id="c_next" type="date">
+        </div>
+      </div>
+      <label>Call notes</label>
+      <textarea id="c_notes" placeholder="What was discussed..."></textarea>
+      <button class="btn" style="margin-top:14px;" onclick="logCall()">Log this call</button>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title"><i class="fa-solid fa-clock"></i> TODAY'S CALLS</h2>
+      <div id="callListToday"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> ALL CALLS</h2>
+      <div id="callListAll"></div>
+    </div>
+  </div>
+
+  <!-- SHEET LOG -->
+  <div class="view" id="view-sheet">
+    <h2 class="section-title"><i class="fa-solid fa-table"></i> GOOGLE SHEET</h2>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px;">
+      <h3 class="big" style="margin-bottom:6px;">Entries submitted to the sheet</h3>
+      <button class="btn small ghost" onclick="loadSheetLog()">Refresh</button>
+    </div>
+    <p style="font-size:13px;color:#475569;margin-top:-6px;margin-bottom:16px;">Pulled directly from the linked Google Sheet — this reflects what has actually been submitted, across all devices.</p>
+    <div class="card">
+      <div id="sheetLogStatus" class="empty">Loading...</div>
+      <div id="sheetLogList"></div>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <div class="view" id="view-about">
+    <h2 class="section-title"><i class="fa-solid fa-circle-info"></i> FOR THE PITCH</h2>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px;">
+      <h3 class="big" style="margin-bottom:6px;">What is DigiDr, and how do you explain it?</h3>
+      <div id="aboutEditControls">
+        <button class="btn small" id="aboutEditBtn" onclick="toggleAboutEdit()">Edit</button>
+      </div>
+    </div>
+    <p style="font-size:13px;color:#475569;margin-top:-6px;margin-bottom:16px;">This section is a placeholder — fill it in with the real pitch whenever it's ready. Anyone on the team can edit it, and it's saved for everyone.</p>
+
+    <div class="card about-block" id="aboutView">
+      <h4>What is DigiDr</h4>
+      <p id="ab_what_view" class="placeholder-text">To be filled — one or two lines on what DigiDr's AI infrastructure for doctors actually is.</p>
+
+      <h4>Why a doctor should care</h4>
+      <p id="ab_why_view" class="placeholder-text">To be filled — the benefits a doctor gets from this AI infrastructure.</p>
+
+      <h4>How onboarding works</h4>
+      <p id="ab_steps_view" class="placeholder-text">To be filled — the onboarding steps, one per line.</p>
+
+      <div class="time-badge">⏱ Onboarding takes just 10–12 minutes</div>
+    </div>
+
+    <div class="card" id="scriptView">
+      <h2 class="section-title"><i class="fa-solid fa-message"></i> CALL SCRIPT — QUICK REFERENCE</h2>
+      <p id="ab_script_view" class="placeholder-text" style="font-size:14.5px;line-height:1.7;">To be filled — the exact opening line to use on a cold call.</p>
+    </div>
+
+    <!-- Edit mode -->
+    <div class="card about-block" id="aboutEdit" style="display:none;">
+      <label>What is DigiDr</label>
+      <textarea id="ab_what" placeholder="e.g. DigiDr is the AI infrastructure layer that runs a doctor's practice — intake, notes, scheduling, and patient follow-up — behind the scenes."></textarea>
+
+      <label>Why a doctor should care</label>
+      <textarea id="ab_why" placeholder="e.g. Saves hours on documentation, reduces missed follow-ups, works with their existing workflow..."></textarea>
+
+      <label>How onboarding works (one step per line)</label>
+      <textarea id="ab_steps" style="min-height:110px;" placeholder="Collect doctor's basic details&#10;Verify credentials&#10;Set up their profile&#10;Walk through the app&#10;Confirm and go live"></textarea>
+
+      <label>Onboarding time badge text</label>
+      <input id="ab_time" placeholder="Onboarding takes just 10–12 minutes">
+
+      <button class="btn" style="margin-top:14px;" onclick="saveAbout()">Save</button>
+      <button class="btn ghost" style="margin-top:14px;" onclick="toggleAboutEdit()">Cancel</button>
+    </div>
+
+    <div class="card" id="scriptEdit" style="display:none;">
+      <label>Call script — quick reference</label>
+      <textarea id="ab_script" style="min-height:100px;" placeholder="e.g. Hi Doctor, I'm calling from DigiDr — we run the AI infrastructure that handles..."></textarea>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<!-- BD login modal -->
+<div class="modal-bg" id="bdModal">
+  <div class="modal">
+    <h3>Who's using this?</h3>
+    <p>Enter your details so calls and onboardings get credited to you. This is shared with the whole BD team.</p>
+    <label>Your name</label>
+    <input id="bd_name" placeholder="e.g. Rohan Shah">
+    <label>Your email</label>
+    <input id="bd_email" type="email" placeholder="rohan@digidr.com">
+    <span class="field-error-msg" id="bd_email_err">Enter a valid email address.</span>
+    <label>Your phone</label>
+    <input id="bd_phone" type="tel">
+    <span class="field-error-msg" id="bd_phone_err">Enter a valid phone number.</span>
+    <button class="btn" style="margin-top:16px;width:100%;" onclick="saveBD()">Continue</button>
+  </div>
+</div>
+
+<!-- International Phone Input JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/intlTelInput.min.js"></script>
+<script>
+let doctors = [];
+let calls = [];
+let planNotes = [];
+let currentBD = null;
+let aboutContent = null;
+const ABOUT_DEFAULT_TIME = 'Onboarding takes just 10–12 minutes';
+
+// ---------- phone inputs (intl-tel-input, country code selector + validation) ----------
+let bdPhoneIti = null;
+let docMobileIti = null;
+
+function setupPhoneInput(inputEl){
+  const iti = window.intlTelInput(inputEl, {
+    initialCountry: 'in',
+    preferredCountries: ['in', 'us', 'gb', 'ae', 'sg'],
+    separateDialCode: true,
+    utilsScript: 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js'
+  });
+  inputEl.addEventListener('input', function(){
+    const value = this.value.replace(/\D/g, '');
+    this.value = value;
+    const activeCountry = iti.getSelectedCountryData();
+    if(activeCountry && activeCountry.iso2 === 'in'){
+      if(value.length > 10) this.value = value.substring(0,10);
+    } else if(value.length > 15){
+      this.value = value.substring(0,15);
+    }
+    clearPhoneError(inputEl);
+  });
+  inputEl.addEventListener('keypress', function(e){
+    if(e.key < '0' || e.key > '9'){ e.preventDefault(); return; }
+    const value = this.value.replace(/\D/g, '');
+    const activeCountry = iti.getSelectedCountryData();
+    if(activeCountry && activeCountry.iso2 === 'in' && value.length >= 10){ e.preventDefault(); }
+    else if(value.length >= 15){ e.preventDefault(); }
+  });
+  inputEl.addEventListener('countrychange', function(){
+    inputEl.value = '';
+    clearPhoneError(inputEl);
+  });
+  return iti;
+}
+function clearPhoneError(inputEl){
+  inputEl.classList.remove('error');
+  const err = document.getElementById(inputEl.id + '_err');
+  if(err) err.classList.remove('show');
+}
+function validatePhone(iti, inputEl, required){
+  const val = inputEl.value.trim();
+  if(!val){
+    if(required){ showFieldError(inputEl, 'Phone number is required.'); return false; }
+    clearPhoneError(inputEl);
+    return true;
+  }
+  if(!iti || !iti.isValidNumber || !iti.isValidNumber()){
+    showFieldError(inputEl, 'Enter a valid phone number.');
+    return false;
+  }
+  clearPhoneError(inputEl);
+  return true;
+}
+function showFieldError(inputEl, msg){
+  inputEl.classList.add('error');
+  const err = document.getElementById(inputEl.id + '_err');
+  if(err){ err.textContent = msg; err.classList.add('show'); }
+}
+function validateEmail(inputEl, required){
+  const val = inputEl.value.trim();
+  if(!val){
+    if(required){ showFieldError(inputEl, 'Email address is required.'); return false; }
+    inputEl.classList.remove('error');
+    const err = document.getElementById(inputEl.id + '_err');
+    if(err) err.classList.remove('show');
+    return true;
+  }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){
+    showFieldError(inputEl, 'Enter a valid email address.');
+    return false;
+  }
+  inputEl.classList.remove('error');
+  const err = document.getElementById(inputEl.id + '_err');
+  if(err) err.classList.remove('show');
+  return true;
+}
+
+// ---------- Google Form sync ----------
+const GFORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfphfY7K9u2U3GnWCvxDRxEO2ZqCH4Hg8nLoVis7vi8evgH6w/formResponse';
+const GFORM_ENTRIES = {
+  docName:      'entry.1405913601',
+  docEmail:     'entry.180651018',
+  docMobile:    'entry.223753319',
+  dept:         'entry.2090855847',
+  status:       'entry.1620568894',
+  followup:     'entry.1862334612',
+  remarks:      'entry.1116474402',
+  bdName:       'entry.774555674',
+  bdEmail:      'entry.1806136066',
+  bdPhone:      'entry.1414656622',
+  callOutcome:  'entry.613849234',
+  callNotes:    'entry.311009367',
+  callNext:     'entry.1977489223'
+};
+async function submitToSheet(fields){
+  try{
+    const body = new URLSearchParams();
+    Object.keys(fields).forEach(key=>{
+      const entryId = GFORM_ENTRIES[key];
+      if(entryId) body.append(entryId, fields[key] || '');
+    });
+    await fetch(GFORM_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type':'application/x-www-form-urlencoded'},
+      body: body.toString()
+    });
+  }catch(e){
+    // Sheet sync failing shouldn't block the app — data is still saved locally
+    console.warn('Google Sheet sync failed', e);
+  }
+}
+const todayStr = () => new Date().toISOString().slice(0,10);
+const fmtDate = (d) => new Date(d+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(()=>t.style.display='none', 2200);
+}
+
+// ---------- storage helpers ----------
+// Uses window.storage when available (host-provided, shared across devices),
+// falling back to localStorage (this browser only) so the app works when
+// opened directly as a local file too.
+async function storageGet(key){
+  if(window.storage && window.storage.get){
+    try{
+      const r = await window.storage.get(key, true);
+      if(r) return r.value;
+    }catch(e){ /* fall through to localStorage */ }
+  }
+  return localStorage.getItem('digidr_'+key);
+}
+async function storageSet(key, value){
+  let ok = false;
+  if(window.storage && window.storage.set){
+    try{ await window.storage.set(key, value, true); ok = true; }
+    catch(e){ /* fall through to localStorage */ }
+  }
+  try{ localStorage.setItem('digidr_'+key, value); ok = true; }catch(e){}
+  return ok;
+}
+
+async function loadAll(){
+  try{
+    const d = await storageGet('doctors');
+    doctors = d ? JSON.parse(d) : [];
+  }catch(e){ doctors = []; }
+  try{
+    const c = await storageGet('calls');
+    calls = c ? JSON.parse(c) : [];
+  }catch(e){ calls = []; }
+  try{
+    const p = await storageGet('planNotes');
+    planNotes = p ? JSON.parse(p) : [];
+  }catch(e){ planNotes = []; }
+  try{
+    const bd = localStorage.getItem('digidr_currentBD');
+    currentBD = bd ? JSON.parse(bd) : null;
+  }catch(e){ currentBD = null; }
+  try{
+    const ab = await storageGet('aboutContent');
+    aboutContent = ab ? JSON.parse(ab) : null;
+  }catch(e){ aboutContent = null; }
+}
+async function saveDoctors(){
+  const ok = await storageSet('doctors', JSON.stringify(doctors));
+  if(!ok) showToast('Could not save — try again');
+}
+async function saveCalls(){
+  const ok = await storageSet('calls', JSON.stringify(calls));
+  if(!ok) showToast('Could not save — try again');
+}
+async function savePlanNotes(){
+  const ok = await storageSet('planNotes', JSON.stringify(planNotes));
+  if(!ok) showToast('Could not save — try again');
+}
+
+// ---------- about section (fill-later) ----------
+function renderAbout(){
+  const c = aboutContent;
+  document.getElementById('ab_what_view').textContent = c && c.what ? c.what : 'To be filled — one or two lines on what DigiDr\'s AI infrastructure for doctors actually is.';
+  document.getElementById('ab_what_view').classList.toggle('placeholder-text', !(c && c.what));
+
+  document.getElementById('ab_why_view').textContent = c && c.why ? c.why : 'To be filled — the benefits a doctor gets from this AI infrastructure.';
+  document.getElementById('ab_why_view').classList.toggle('placeholder-text', !(c && c.why));
+
+  const stepsHtml = (c && c.steps && c.steps.length)
+    ? '<ol class="steps">' + c.steps.map(s=>`<li>${escapeHtml(s)}</li>`).join('') + '</ol>'
+    : '<p class="placeholder-text">To be filled — the onboarding steps, one per line.</p>';
+  document.getElementById('ab_steps_view').outerHTML = `<div id="ab_steps_view">${stepsHtml}</div>`;
+
+  document.querySelector('.time-badge').textContent = '⏱ ' + (c && c.time ? c.time : ABOUT_DEFAULT_TIME);
+
+  document.getElementById('ab_script_view').textContent = c && c.script ? c.script : 'To be filled — the exact opening line to use on a cold call.';
+  document.getElementById('ab_script_view').classList.toggle('placeholder-text', !(c && c.script));
+}
+function toggleAboutEdit(){
+  const editing = document.getElementById('aboutEdit').style.display !== 'none';
+  if(editing){
+    document.getElementById('aboutEdit').style.display = 'none';
+    document.getElementById('scriptEdit').style.display = 'none';
+    document.getElementById('aboutView').style.display = '';
+    document.getElementById('scriptView').style.display = '';
+    document.getElementById('aboutEditBtn').textContent = 'Edit';
+  } else {
+    const c = aboutContent || {};
+    document.getElementById('ab_what').value = c.what || '';
+    document.getElementById('ab_why').value = c.why || '';
+    document.getElementById('ab_steps').value = (c.steps || []).join('\n');
+    document.getElementById('ab_time').value = c.time || ABOUT_DEFAULT_TIME;
+    document.getElementById('ab_script').value = c.script || '';
+    document.getElementById('aboutEdit').style.display = '';
+    document.getElementById('scriptEdit').style.display = '';
+    document.getElementById('aboutView').style.display = 'none';
+    document.getElementById('scriptView').style.display = 'none';
+    document.getElementById('aboutEditBtn').textContent = 'Editing…';
+  }
+}
+async function saveAbout(){
+  aboutContent = {
+    what: document.getElementById('ab_what').value.trim(),
+    why: document.getElementById('ab_why').value.trim(),
+    steps: document.getElementById('ab_steps').value.split('\n').map(s=>s.trim()).filter(Boolean),
+    time: document.getElementById('ab_time').value.trim() || ABOUT_DEFAULT_TIME,
+    script: document.getElementById('ab_script').value.trim()
+  };
+  const ok = await storageSet('aboutContent', JSON.stringify(aboutContent));
+  showToast(ok ? 'Saved' : 'Could not save — try again');
+  renderAbout();
+  toggleAboutEdit();
+}
+
+// ---------- BD identity ----------
+function renderBDStrip(){
+  const strip = document.getElementById('bdStrip');
+  if(!currentBD){
+    strip.innerHTML = `<div class="who">No BD signed in</div><button onclick="openBDModal()">Sign in</button>`;
+    return;
+  }
+  strip.innerHTML = `<div class="who">Calling as <strong>${escapeHtml(currentBD.name)}</strong> · ${escapeHtml(currentBD.email)} · ${escapeHtml(currentBD.phone)}</div><button onclick="openBDModal()">Switch user</button>`;
+}
+function openBDModal(){
+  document.getElementById('bdModal').classList.add('active');
+  if(!bdPhoneIti){
+    bdPhoneIti = setupPhoneInput(document.getElementById('bd_phone'));
+  }
+  if(currentBD){
+    document.getElementById('bd_name').value = currentBD.name;
+    document.getElementById('bd_email').value = currentBD.email;
+    if(bdPhoneIti && bdPhoneIti.setNumber){
+      bdPhoneIti.setNumber(currentBD.phone || '');
+    } else {
+      document.getElementById('bd_phone').value = currentBD.phone;
+    }
+  }
+}
+async function saveBD(){
+  const name = document.getElementById('bd_name').value.trim();
+  const emailEl = document.getElementById('bd_email');
+  const phoneEl = document.getElementById('bd_phone');
+  if(!name){ showToast('Please enter your name'); return; }
+  const emailOk = validateEmail(emailEl, false);
+  const phoneOk = validatePhone(bdPhoneIti, phoneEl, true);
+  if(!emailOk || !phoneOk){ showToast('Please fix the highlighted fields'); return; }
+  const fullPhone = bdPhoneIti && bdPhoneIti.getNumber ? bdPhoneIti.getNumber() : phoneEl.value.trim();
+  currentBD = {name, email: emailEl.value.trim(), phone: fullPhone};
+  try{ localStorage.setItem('digidr_currentBD', JSON.stringify(currentBD)); }catch(e){}
+  document.getElementById('bdModal').classList.remove('active');
+  renderBDStrip();
+  showToast('Signed in as ' + name);
+}
+
+// ---------- tabs ----------
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-'+btn.dataset.view).classList.add('active');
+    if(btn.dataset.view==='dashboard') renderDashboard();
+    if(btn.dataset.view==='doctors') renderDoctors();
+    if(btn.dataset.view==='calls') renderCalls();
+    if(btn.dataset.view==='sheet') loadSheetLog();
+    if(btn.dataset.view==='about') renderAbout();
+  });
+});
+
+// ---------- Sheet Log (read-only pull from the linked Google Sheet) ----------
+const SHEET_ID = '17l2AlEBAbRfi8C2c7_QmCpo0cERbKtf-sPKgUf2-s1w';
+let sheetJsonpCounter = 0;
+
+// Fetches all rows from the linked Sheet via its JSONP gviz endpoint (avoids
+// CORS restrictions on the plain CSV/JSON export). Calls onRows(rowObjects)
+// on success, or onError(err) on failure/timeout.
+function fetchSheetRows(onRows, onError){
+  const callbackName = 'digidrSheetCallback_' + (sheetJsonpCounter++);
+  const scriptId = 'sheetFetchScript_' + callbackName;
+
+  const timeout = setTimeout(()=>{
+    delete window[callbackName];
+    onError(new Error('timeout'));
+  }, 10000);
+
+  window[callbackName] = function(resp){
+    clearTimeout(timeout);
+    delete window[callbackName];
+    const script = document.getElementById(scriptId);
+    if(script) script.remove();
+    try{
+      if(!resp || !resp.table || !resp.table.rows){
+        onRows([]);
+        return;
+      }
+      const headers = (resp.table.cols || []).map(c => c.label || c.id || '');
+      const dataRows = resp.table.rows
+        .map(r => (r.c || []).map(cell => cell && cell.f != null ? cell.f : (cell && cell.v != null ? String(cell.v) : '')))
+        .filter(r => r.some(v => (v||'').trim() !== ''));
+      const rowObjects = dataRows.map(r => {
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = (r[i]||'').trim());
+        return obj;
+      });
+      onRows(rowObjects);
+    }catch(e){
+      onError(e);
+    }
+  };
+
+  const script = document.createElement('script');
+  script.id = scriptId;
+  script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json;responseHandler:${callbackName}&_=${Date.now()}`;
+  script.onerror = () => {
+    clearTimeout(timeout);
+    delete window[callbackName];
+    onError(new Error('script load failed'));
+  };
+  document.body.appendChild(script);
+}
+
+function loadSheetLog(){
+  const statusEl = document.getElementById('sheetLogStatus');
+  const listEl = document.getElementById('sheetLogList');
+  statusEl.textContent = 'Loading...';
+  statusEl.style.display = '';
+  listEl.innerHTML = '';
+
+  fetchSheetRows(
+    (rows) => {
+      if(rows.length === 0){
+        statusEl.textContent = 'No entries in the sheet yet.';
+        return;
+      }
+      statusEl.style.display = 'none';
+      const fullWidthFields = ['Remarks', 'Call Notes'];
+      listEl.innerHTML = rows.slice().reverse().map((obj, idx) => {
+        const name = obj['Doctor Name'] || obj['BD Name'] || 'Entry';
+        const preview = obj['Speciality'] || obj['Status'] || obj['Call Outcome'] || '';
+        const fields = Object.keys(obj).filter(h => h !== 'Timestamp' && h !== 'Doctor Name' && obj[h]);
+        return `<div class="sheet-entry" id="sheetEntry${idx}">
+          <div class="sheet-entry-top" onclick="toggleSheetEntry(${idx})">
+            <div class="sheet-entry-top-left">
+              <i class="fa-solid fa-chevron-right sheet-entry-chevron"></i>
+              <span class="sheet-entry-name">${escapeHtml(name)}</span>
+              <span class="sheet-entry-preview">${escapeHtml(preview)}</span>
+            </div>
+            <span class="sheet-entry-time">${escapeHtml(obj['Timestamp']||'')}</span>
+          </div>
+          <div class="sheet-entry-body">
+            <div class="sheet-entry-grid">
+              ${fields.map(h => `<div class="sheet-entry-field${fullWidthFields.includes(h) ? ' full' : ''}"><span class="k">${escapeHtml(h)}</span><span class="v">${h==='Status' ? `<span class="sheet-status-tag">${escapeHtml(obj[h])}</span>` : escapeHtml(obj[h])}</span></div>`).join('')}
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    },
+    (err) => {
+      statusEl.textContent = 'Could not load the sheet — check it is shared as "Anyone with the link can view".';
+      console.warn('Sheet log load failed', err);
+    }
+  );
+}
+
+function escapeHtml(s){
+  return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function toggleSheetEntry(idx){
+  const el = document.getElementById('sheetEntry'+idx);
+  if(el) el.classList.toggle('open');
+}
+
+// ---------- add doctor ----------
+async function saveDoctor(){
+  const name = document.getElementById('f_name').value.trim();
+  if(!name){ showToast('Doctor name is required'); return; }
+  if(!currentBD){ openBDModal(); showToast('Please sign in first'); return; }
+
+  const emailEl = document.getElementById('f_email');
+  const mobileEl = document.getElementById('f_mobile');
+  const emailOk = validateEmail(emailEl, false);
+  const mobileOk = validatePhone(docMobileIti, mobileEl, false);
+  if(!emailOk || !mobileOk){ showToast('Please fix the highlighted fields'); return; }
+
+  const mobileVal = mobileEl.value.trim() ? (docMobileIti && docMobileIti.getNumber ? docMobileIti.getNumber() : mobileEl.value.trim()) : '';
+
+  const doc = {
+    id: 'd'+Date.now(),
+    name,
+    email: emailEl.value.trim(),
+    mobile: mobileVal,
+    dept: document.getElementById('f_dept').value,
+    status: document.getElementById('f_status').value,
+    followup: document.getElementById('f_followup').value,
+    remarks: document.getElementById('f_remarks').value.trim(),
+    addedBy: currentBD.name,
+    addedOn: todayStr()
+  };
+  doctors.push(doc);
+  await saveDoctors();
+  submitToSheet({
+    docName: doc.name, docEmail: doc.email, docMobile: doc.mobile,
+    dept: doc.dept, status: doc.status, followup: doc.followup, remarks: doc.remarks,
+    bdName: currentBD.name, bdEmail: currentBD.email, bdPhone: currentBD.phone
+  });
+  ['f_name','f_email','f_mobile','f_remarks','f_followup'].forEach(id=>document.getElementById(id).value='');
+  clearPhoneError(mobileEl);
+  emailEl.classList.remove('error');
+  document.getElementById('f_dept').value = 'Cardiology';
+  document.getElementById('f_status').value = 'New';
+  showToast('Doctor saved');
+  renderDashboard();
+}
+
+// ---------- doctor list ----------
+let sheetDoctors = null; // null = not loaded yet, [] = loaded, empty
+
+function doctorKey(name, mobile){
+  return (name||'').trim().toLowerCase() + '|' + (mobile||'').replace(/\D/g,'');
+}
+
+function loadSheetDoctors(onDone){
+  fetchSheetRows(
+    (rows) => {
+      sheetDoctors = rows.filter(obj => obj['Doctor Name']).map(obj => ({
+        id: null,
+        fromSheet: true,
+        name: obj['Doctor Name'],
+        email: obj['Doctor Email'] || '',
+        mobile: obj['Doctor Mobile'] || '',
+        dept: obj['Speciality'] || '',
+        status: obj['Status'] || 'New',
+        followup: obj['Follow-up Date'] || '',
+        remarks: obj['Remarks'] || '',
+        addedBy: obj['BD Name'] || '',
+        addedOn: obj['Timestamp'] || ''
+      }));
+      if(onDone) onDone();
+    },
+    (err) => {
+      console.warn('Could not load doctors from sheet', err);
+      sheetDoctors = sheetDoctors || [];
+      if(onDone) onDone();
+    }
+  );
+}
+
+function mergedDoctorList(){
+  const localKeys = new Set(doctors.map(d => doctorKey(d.name, d.mobile)));
+  const fromSheet = (sheetDoctors || []).filter(d => !localKeys.has(doctorKey(d.name, d.mobile)));
+  return doctors.concat(fromSheet);
+}
+
+function refreshDoctorList(){
+  sheetDoctors = null;
+  renderDoctors();
+}
+
+function renderDoctors(){
+  const list = document.getElementById('doctorList');
+  const q = (document.getElementById('searchDoc').value || '').toLowerCase();
+
+  if(sheetDoctors === null){
+    list.innerHTML = `<div class="empty">Loading doctors...</div>`;
+    loadSheetDoctors(() => renderDoctors());
+    return;
+  }
+
+  const all = mergedDoctorList();
+  const filtered = all.filter(d => d.name.toLowerCase().includes(q) || (d.dept||'').toLowerCase().includes(q));
+  if(filtered.length===0){
+    list.innerHTML = `<div class="empty">No doctors yet. Add your first lead from the "Add Doctor" tab.</div>`;
+    return;
+  }
+  list.innerHTML = filtered.slice().reverse().map(d => `
+    <div class="doc-card">
+      <div class="doc-top">
+        <div class="doc-name">${escapeHtml(d.name)}</div>
+        <span class="status-pill status-${(d.status||'New').replace(' ','-')}">${d.status||'New'}</span>
+      </div>
+      ${(d.dept || d.fromSheet) ? `<div class="doc-badges">
+        ${d.dept ? `<span class="doc-dept">${escapeHtml(d.dept)}</span>` : ''}
+        ${d.fromSheet ? `<span class="doc-dept tag-sheet">From sheet</span>` : ''}
+      </div>` : ''}
+      <div class="doc-details">
+        ${d.email ? `✉ ${escapeHtml(d.email)}<br>` : ''}
+        ${d.mobile ? `☎ ${escapeHtml(d.mobile)}<br>` : ''}
+        ${d.followup ? `Next follow-up: ${fmtDate(d.followup)}<br>` : ''}
+        Added by ${escapeHtml(d.addedBy||'—')}${d.fromSheet ? ` on ${escapeHtml(d.addedOn)}` : ` on ${d.addedOn}`}
+      </div>
+      ${d.remarks ? `<div class="doc-remarks">${escapeHtml(d.remarks)}</div>` : ''}
+      ${d.fromSheet ? '' : `
+      <div class="doc-actions">
+        <select onchange="updateStatus('${d.id}', this.value)">
+          ${['New','Contacted','Onboarded','Not Interested'].map(s=>`<option ${s===d.status?'selected':''}>${s}</option>`).join('')}
+        </select>
+        <button class="btn small" onclick="setFollowup('${d.id}')">Set follow-up</button>
+        <button class="btn small ghost" onclick="deleteDoctor('${d.id}')">Delete</button>
+      </div>`}
+    </div>
+  `).join('');
+}
+async function updateStatus(id, status){
+  const d = doctors.find(x=>x.id===id);
+  if(d){ d.status = status; await saveDoctors(); renderDoctors(); renderDashboard(); }
+}
+async function setFollowup(id){
+  const d = doctors.find(x=>x.id===id);
+  if(!d) return;
+  const val = prompt('Follow-up date (YYYY-MM-DD)', d.followup || todayStr());
+  if(val){ d.followup = val; await saveDoctors(); renderDoctors(); renderDashboard(); showToast('Follow-up set'); }
+}
+async function deleteDoctor(id){
+  if(!confirm('Delete this doctor?')) return;
+  doctors = doctors.filter(x=>x.id!==id);
+  await saveDoctors();
+  renderDoctors(); renderDashboard();
+}
+
+// ---------- dashboard ----------
+function renderDashboard(){
+  document.getElementById('dashDate').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  document.getElementById('statTotal').textContent = doctors.length;
+  document.getElementById('statOnboarded').textContent = doctors.filter(d=>d.status==='Onboarded').length;
+
+  const today = todayStr();
+  const due = doctors.filter(d => d.followup && d.followup <= today);
+  document.getElementById('statDue').textContent = due.length;
+
+  const dueList = document.getElementById('dueList');
+  dueList.innerHTML = due.length ? due.map(d => `
+    <div class="followup-item">
+      <div>
+        <div class="fi-name">${escapeHtml(d.name)} <span style="font-size:13px;color:#475569;font-weight:500;">(${escapeHtml(d.dept)})</span></div>
+        <div class="fi-meta ${d.followup < today ? 'overdue' : ''}">${d.followup < today ? 'Overdue — was due' : 'Due'} ${fmtDate(d.followup)} · ${escapeHtml(d.mobile||'no number')}</div>
+      </div>
+      <button class="btn small" onclick="switchToCallTab('${d.id}')">Follow up</button>
+    </div>
+  `).join('') : `<div class="empty">Nothing due today. Nice.</div>`;
+
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+  const tomStr = tomorrow.toISOString().slice(0,10);
+  const tomList = document.getElementById('tomorrowList');
+  const tomDoctors = doctors.filter(d => d.followup === tomStr);
+  const tomNotes = planNotes.filter(n => n.date === todayStr());
+  let html = '';
+  if(tomDoctors.length){
+    html += tomDoctors.map(d => `<div class="followup-item"><div class="fi-name">${escapeHtml(d.name)}</div><div class="fi-meta">${escapeHtml(d.dept)} · ${escapeHtml(d.mobile||'')}</div></div>`).join('');
+  }
+  if(tomNotes.length){
+    html += tomNotes.map(n => `<div class="followup-item"><div class="fi-name" style="font-size:14px;font-weight:600;">${escapeHtml(n.text)}</div><div class="fi-meta">added by ${escapeHtml(n.by)}</div></div>`).join('');
+  }
+  tomorrowList.innerHTML = html || `<div class="empty">No plan for tomorrow yet — add a note below, or set a follow-up date on a doctor.</div>`;
+}
+function switchToCallTab(docId){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelector('[data-view="calls"]').classList.add('active');
+  document.getElementById('view-calls').classList.add('active');
+  renderCalls();
+  document.getElementById('c_doctor').value = docId;
+}
+async function addPlanNote(){
+  const text = document.getElementById('planNote').value.trim();
+  if(!text) return;
+  if(!currentBD){ openBDModal(); return; }
+  planNotes.push({text, date: todayStr(), by: currentBD.name});
+  await savePlanNotes();
+  document.getElementById('planNote').value='';
+  renderDashboard();
+  showToast('Added to tomorrow\'s plan');
+}
+
+// ---------- call register ----------
+function renderCalls(){
+  const sel = document.getElementById('c_doctor');
+  sel.innerHTML = doctors.map(d => `<option value="${d.id}">${escapeHtml(d.name)} — ${escapeHtml(d.dept)}</option>`).join('') || `<option>No doctors added yet</option>`;
+
+  const today = todayStr();
+  const todays = calls.filter(c => c.date === today);
+  document.getElementById('callListToday').innerHTML = todays.length ? todays.slice().reverse().map(callHtml).join('') : `<div class="empty">No calls logged today yet.</div>`;
+  document.getElementById('callListAll').innerHTML = calls.length ? calls.slice().reverse().slice(0,50).map(callHtml).join('') : `<div class="empty">No calls logged yet.</div>`;
+}
+function callHtml(c){
+  return `<div class="call-item">
+    <div class="call-top"><span>${c.date} · ${escapeHtml(c.by)}</span><span class="outcome-tag">${escapeHtml(c.outcome)}</span></div>
+    <div class="call-doc">${escapeHtml(c.docName)}</div>
+    ${c.notes ? `<div style="margin-top:3px;">${escapeHtml(c.notes)}</div>` : ''}
+    ${c.next ? `<div style="margin-top:3px;color:#475569;">Next action: ${fmtDate(c.next)}</div>` : ''}
+  </div>`;
+}
+async function logCall(){
+  if(!currentBD){ openBDModal(); showToast('Please sign in first'); return; }
+  const docId = document.getElementById('c_doctor').value;
+  const doc = doctors.find(d=>d.id===docId);
+  if(!doc){ showToast('Add a doctor first'); return; }
+  const next = document.getElementById('c_next').value;
+  calls.push({
+    id: 'c'+Date.now(),
+    docId, docName: doc.name,
+    outcome: document.getElementById('c_outcome').value,
+    notes: document.getElementById('c_notes').value.trim(),
+    next,
+    date: todayStr(),
+    by: currentBD.name
+  });
+  if(next){ doc.followup = next; await saveDoctors(); }
+  await saveCalls();
+  submitToSheet({
+    docName: doc.name, dept: doc.dept,
+    bdName: currentBD.name, bdEmail: currentBD.email, bdPhone: currentBD.phone,
+    callOutcome: document.getElementById('c_outcome').value,
+    callNotes: document.getElementById('c_notes').value.trim(),
+    callNext: next
+  });
+  document.getElementById('c_notes').value='';
+  document.getElementById('c_next').value='';
+  showToast('Call logged');
+  renderCalls();
+  renderDashboard();
+}
+
+// ---------- init ----------
+(async function init(){
+  docMobileIti = setupPhoneInput(document.getElementById('f_mobile'));
+  document.getElementById('f_email').addEventListener('blur', function(){ validateEmail(this, false); });
+  document.getElementById('bd_email').addEventListener('blur', function(){ validateEmail(this, false); });
+
+  await loadAll();
+  renderBDStrip();
+  renderDashboard();
+  renderDoctors();
+  renderCalls();
+  renderAbout();
+  if(!currentBD) openBDModal();
+})();
+</script>
+
+</body>
+</html>
