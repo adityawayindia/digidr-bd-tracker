@@ -67,13 +67,19 @@
     position:relative;
     z-index:2;
     display:flex;
-    justify-content:center;
+    justify-content:flex-start;
     gap:2px;
     background:rgba(248,250,252,0.9);
     border-bottom:1px solid #E2E8F0;
     overflow-x:auto;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
   }
+  nav.tabs::-webkit-scrollbar{display:none;}
+  nav.tabs button:first-child{margin-left:auto;}
+  nav.tabs button:last-child{margin-right:auto;}
   nav.tabs button{
+    flex:none;
     font-family:inherit;
     font-size:14px;
     font-weight:700;
@@ -136,8 +142,8 @@
   }
   .bd-strip .who{font-size:14px;color:#475569;}
   .bd-strip .who strong{color:#0C3B5E;font-size:15px;}
+  .bd-strip .strip-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;}
   .bd-strip button{
-    margin-left:auto;
     background:none;
     border:1.5px solid #CBD5E1;
     padding:7px 14px;
@@ -290,59 +296,118 @@
 
   /* doctor list */
   .doc-card{
-    background:rgba(255,255,255,0.92);
+    background:rgba(255,255,255,0.94);
     backdrop-filter:blur(16px);
-    border:1px solid rgba(255,255,255,0.6);
+    border:1px solid #E2E8F0;
+    border-left:4px solid #CBD5E1;
     border-radius:16px;
-    padding:18px;
     margin-bottom:12px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.06);
+    box-shadow:0 6px 18px rgba(12,59,94,0.06);
+    overflow:hidden;
+    transition:box-shadow 0.2s ease, border-color 0.2s ease;
   }
-  .doc-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
-  .doc-name{font-size:17px;font-weight:700;color:#0C3B5E;}
-  .doc-badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+  .doc-card:hover{box-shadow:0 10px 26px rgba(12,59,94,0.11);}
+  .doc-card.st-New{border-left-color:#ED930C;}
+  .doc-card.st-Contacted{border-left-color:#0E65D7;}
+  .doc-card.st-Onboarded{border-left-color:#0F9D58;}
+  .doc-card.st-Not-Interested{border-left-color:#DC2626;}
+  .doc-card.open{box-shadow:0 14px 32px rgba(12,59,94,0.12);}
+
+  .doc-head{
+    display:flex;align-items:center;gap:14px;
+    padding:14px 16px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .doc-head:hover{background:#F8FAFC;}
+  .doc-head:focus-visible{outline:2px solid #0E65D7;outline-offset:-2px;}
+  .doc-avatar{
+    flex:none;width:42px;height:42px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:700;color:#0C3B5E;
+    background:linear-gradient(135deg,#DBEAFE,#FDE7C2);
+  }
+  .doc-main{flex:1;min-width:0;}
+  .doc-name{font-size:16.5px;font-weight:700;color:#0C3B5E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .doc-card.open .doc-name{white-space:normal;}
+  .doc-sub{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;margin-top:4px;font-size:13px;color:#475569;}
   .doc-dept{
-    display:inline-block;
-    font-size:12px;
-    font-weight:700;
-    color:#0E65D7;
-    background:#EFF6FF;
-    padding:4px 10px;
-    border-radius:20px;
-    line-height:1.3;
+    display:inline-block;font-size:12px;font-weight:700;color:#0E65D7;background:#EFF6FF;
+    padding:3px 10px;border-radius:20px;line-height:1.3;
   }
-  .doc-dept.tag-sheet{color:#475569;background:#F1F5F9;}
-  .doc-details{
-    font-size:14px;
-    color:#475569;
-    margin-top:12px;
-    line-height:1.8;
+  .due-chip{
+    display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;
+    padding:3px 10px;border-radius:20px;background:#F1F5F9;color:#475569;line-height:1.3;
   }
+  .due-chip.overdue{background:#FEF2F2;color:#DC2626;}
+  .due-chip.today{background:#FFF7ED;color:#C2620A;}
+  .doc-head-right{display:flex;align-items:center;gap:12px;flex:none;}
+  .doc-chevron{color:#64748B;font-size:13px;transition:transform 0.25s ease;}
+  .doc-card.open .doc-chevron{transform:rotate(180deg);}
+  @media (max-width:560px){
+    .doc-head{align-items:flex-start;}
+    .doc-head-right{flex-direction:column-reverse;align-items:flex-end;gap:8px;}
+  }
+
   .status-pill{
-    font-size:12px;
-    font-weight:700;
-    padding:5px 12px;
-    border-radius:20px;
-    white-space:nowrap;
-    line-height:1.3;
+    font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;white-space:nowrap;line-height:1.3;
   }
   .status-New{background:#FFF7ED;color:#C2620A;}
   .status-Contacted{background:#EFF6FF;color:#0E65D7;}
   .status-Onboarded{background:#ECFDF5;color:#0F9D58;}
   .status-Not-Interested{background:#FEF2F2;color:#DC2626;}
-  .doc-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
-  .doc-actions select{width:auto;padding:7px 10px;font-size:13px;border-radius:9px;}
+
+  .doc-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows 0.28s ease;}
+  .doc-card.open .doc-body{grid-template-rows:1fr;}
+  .doc-body-inner{overflow:hidden;min-height:0;}
+  .doc-body-pad{padding:2px 16px 16px;border-top:1px solid #EEF2F7;}
+  .doc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 24px;padding-top:14px;}
+  @media (max-width:560px){.doc-grid{grid-template-columns:1fr;}}
+  .doc-field .k{display:block;font-size:11.5px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:2px;}
+  .doc-field .v{font-size:15px;color:#0F172A;word-break:break-word;}
+  .doc-field .v a{color:#0E65D7;text-decoration:none;font-weight:600;}
+  .doc-field .v a:hover{text-decoration:underline;}
+  .doc-field .v.overdue{color:#DC2626;font-weight:700;}
+  .doc-field.full{grid-column:1 / -1;}
   .doc-remarks{
-    margin-top:12px;
-    font-size:14px;
-    font-style:italic;
-    color:#334155;
-    background:#F8FAFC;
-    padding:10px 14px;
-    border-left:3px solid #ED930C;
-    border-radius:0 8px 8px 0;
-    line-height:1.5;
+    margin-top:14px;font-size:14px;font-style:italic;color:#334155;background:#F8FAFC;
+    padding:10px 14px;border-left:3px solid #ED930C;border-radius:0 8px 8px 0;line-height:1.5;
   }
+  .doc-actions{
+    display:flex;gap:8px;margin-top:16px;padding-top:14px;border-top:1px dashed #E2E8F0;
+    flex-wrap:wrap;align-items:center;
+  }
+  .doc-actions .spacer{flex:1;}
+  .doc-actions select{width:auto;padding:7px 34px 7px 10px;font-size:13px;border-radius:9px;}
+  .btn.danger{background:none;border:1.5px solid #FECACA;color:#DC2626;box-shadow:none;}
+  .btn.danger:hover{background:#FEF2F2;border-color:#DC2626;color:#DC2626;}
+  .page-head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px 14px;margin-bottom:8px;}
+  .page-head h3.big{margin-bottom:0;}
+  .page-head .page-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .page-sub{font-size:13px;color:#475569;margin:0 0 16px;line-height:1.5;}
+  .btn{white-space:nowrap;}
+  .due-chip{white-space:nowrap;}
+  .call-item .call-top{flex-wrap:wrap;align-items:center;gap:4px 10px;}
+  @media (max-width:600px){
+    .stat-row .stat:last-child:nth-child(odd){grid-column:1 / -1;}
+    h3.big{font-size:22px;}
+    .doc-actions select, .doc-actions input[type=date]{flex:1 1 140px;}
+    .doc-actions .spacer{display:none;}
+    .doc-actions .btn{flex:1 1 auto;}
+    .followup-item{align-items:flex-start;}
+  }
+  /* touch devices: comfortable tap targets (~44px) */
+  @media (pointer:coarse), (max-width:1024px){
+    .btn.small, .link-btn, .bd-strip button{min-height:40px;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+    .doc-actions select, .doc-actions input[type=date]{min-height:40px;}
+    .plan-x{min-width:40px;min-height:40px;}
+    .doc-field .v a{display:inline-block;padding:10px 0;}
+    .link-btn{padding:4px 10px;}
+  }
+  .doc-field .k{font-size:12px;}
+  .list-tools{display:flex;justify-content:space-between;align-items:center;margin:-6px 0 12px;font-size:13px;color:#475569;}
+  .link-btn{background:none;border:none;font:inherit;font-weight:700;color:#0E65D7;cursor:pointer;padding:4px 6px;border-radius:6px;}
+  .link-btn:hover{background:#EFF6FF;}
 
   .empty{
     color:#475569;
@@ -409,65 +474,38 @@
   .call-item:last-child{border-bottom:none;}
   .call-item .call-top{display:flex;justify-content:space-between;color:#475569;font-size:13px;margin-bottom:3px;}
   .call-item .call-doc{font-size:16px;font-weight:700;color:#0C3B5E;}
-  /* sheet log */
-  .sheet-entry{
-    background:#F8FAFC;
-    border:1px solid #E2E8F0;
-    border-radius:14px;
-    margin-bottom:10px;
-    overflow:hidden;
+  /* sync status */
+  .sync{display:flex;align-items:center;gap:7px;font-size:13px;color:#475569;font-weight:600;}
+  .sync .dot{width:9px;height:9px;border-radius:50%;background:#94A3B8;flex:none;}
+  .sync.ok .dot{background:#0F9D58;}
+  .sync.busy .dot{background:#ED930C;}
+  .sync.err .dot{background:#DC2626;}
+  .sync.err{color:#DC2626;}
+
+  /* doctor list filters */
+  .filters{display:grid;grid-template-columns:1fr 200px;gap:10px;margin-bottom:16px;}
+  @media (max-width:600px){.filters{grid-template-columns:1fr;}}
+  .doc-actions input[type=date]{width:auto;padding:6px 10px;font-size:13px;border-radius:9px;}
+  .hint{font-size:12.5px;color:#475569;margin-top:5px;}
+  .modal.wide{max-width:600px;}
+  .modal-actions{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap;}
+
+  /* plan notes */
+  .plan-x{
+    background:none;border:none;cursor:pointer;color:#94A3B8;font-size:16px;padding:4px 8px;border-radius:8px;
   }
-  .sheet-entry:last-child{margin-bottom:0;}
-  .sheet-entry-top{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:14px;
-    padding:14px 16px;
-    cursor:pointer;
-    user-select:none;
-  }
-  .sheet-entry-top:hover{background:#EFF6FF;}
-  .sheet-entry-top-left{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    min-width:0;
-  }
-  .sheet-entry-chevron{
-    color:#475569;
-    font-size:13px;
-    flex:none;
-    transition:transform 0.2s ease;
-  }
-  .sheet-entry.open .sheet-entry-chevron{transform:rotate(90deg);}
-  .sheet-entry-name{font-size:16px;font-weight:700;color:#0C3B5E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .sheet-entry-preview{font-size:14px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .sheet-entry-time{font-size:13px;color:#475569;white-space:nowrap;flex:none;}
-  .sheet-entry-body{
-    max-height:0;
-    overflow:hidden;
-    transition:max-height 0.25s ease;
-  }
-  .sheet-entry.open .sheet-entry-body{max-height:600px;}
-  .sheet-entry-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:12px 24px;
-    padding:0 16px 16px;
-    border-top:1px solid #E2E8F0;
-    padding-top:14px;
-  }
-  @media (max-width:560px){.sheet-entry-grid{grid-template-columns:1fr;}}
-  .sheet-entry-field{font-size:16px;line-height:1.5;}
-  .sheet-entry-field .k{color:#475569;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:0.3px;display:block;margin-bottom:2px;}
-  .sheet-entry-field .v{color:#0F172A;}
-  .sheet-entry-field.full{grid-column:1 / -1;}
-  .sheet-status-tag{
-    display:inline-block;
-    font-size:13px;font-weight:700;padding:3px 11px;border-radius:20px;
-    background:#EFF6FF;color:#0E65D7;
-  }
+  .plan-x:hover{color:#DC2626;background:#FEF2F2;}
+  .sub-head{font-size:12.5px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.4px;margin:16px 0 2px;}
+
+  /* sheet log (activity) */
+  .act-item{padding:11px 0;border-bottom:1px solid #E2E8F0;}
+  .act-item:last-child{border-bottom:none;}
+  .act-top{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:#475569;}
+  .act-action{font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;background:#EFF6FF;color:#0E65D7;white-space:nowrap;}
+  .act-action.del{background:#FEF2F2;color:#DC2626;}
+  .act-action.call{background:#FFF7ED;color:#C2620A;}
+  .act-details{font-size:15px;color:#0F172A;margin-top:4px;line-height:1.45;}
+  .meta-line{font-size:13px;color:#475569;margin-top:12px;}
 
   .outcome-tag{
     font-size:12px;font-weight:700;padding:3px 9px;border-radius:20px;
@@ -539,7 +577,14 @@
 
 <main>
 
-  <div class="bd-strip" id="bdStrip"></div>
+  <div class="bd-strip">
+    <div class="who" id="bdWho">No BD signed in</div>
+    <div class="sync" id="syncStatus"><span class="dot"></span><span id="syncText">Not connected</span></div>
+    <div class="strip-actions">
+      <button onclick="refreshFromSheet()" title="Reload everything from the Google Sheet"><i class="fa-solid fa-rotate"></i> Sync</button>
+      <button id="bdBtn" onclick="openBDModal()">Sign in</button>
+    </div>
+  </div>
 
   <!-- DASHBOARD -->
   <div class="view active" id="view-dashboard">
@@ -555,6 +600,7 @@
     <div class="card">
       <h2 class="section-title"><i class="fa-solid fa-phone"></i> FOLLOW-UPS DUE TODAY / OVERDUE</h2>
       <div id="dueList"></div>
+      <div id="todayNotes"></div>
     </div>
 
     <div class="card">
@@ -591,30 +637,11 @@
       <div class="row3">
         <div>
           <label>Department / Speciality</label>
-          <select id="f_dept">
-            <option>Cardiology</option>
-            <option>Dentistry</option>
-            <option>Urology</option>
-            <option>Dermatology</option>
-            <option>Orthopedics</option>
-            <option>Pediatrics</option>
-            <option>Gynecology</option>
-            <option>ENT</option>
-            <option>General Physician</option>
-            <option>Neurology</option>
-            <option>Psychiatry</option>
-            <option>Ophthalmology</option>
-            <option>Other</option>
-          </select>
+          <select id="f_dept" class="dept-select"></select>
         </div>
         <div>
           <label>Onboarding status</label>
-          <select id="f_status">
-            <option>New</option>
-            <option>Contacted</option>
-            <option>Onboarded</option>
-            <option>Not Interested</option>
-          </select>
+          <select id="f_status" class="status-select"></select>
         </div>
         <div>
           <label>Next follow-up date</label>
@@ -632,12 +659,21 @@
   <!-- DOCTOR LIST -->
   <div class="view" id="view-doctors">
     <h2 class="section-title"><i class="fa-solid fa-address-book"></i> ALL LEADS</h2>
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px;">
-      <h3 class="big" style="margin-bottom:6px;">Doctor list</h3>
-      <button class="btn small ghost" onclick="refreshDoctorList()">Refresh</button>
+    <div class="page-head">
+      <h3 class="big">Doctor list</h3>
+      <button class="btn small ghost" onclick="refreshFromSheet()">Refresh</button>
     </div>
-    <p style="font-size:13px;color:#475569;margin-top:-6px;margin-bottom:16px;">Combines leads added here with entries submitted to the shared sheet.</p>
-    <input id="searchDoc" placeholder="Search by name or department..." style="margin-bottom:16px;" oninput="renderDoctors()">
+    <p class="page-sub">Every doctor in the shared sheet, added by anyone on the team. Changes here are saved to the sheet.</p>
+    <div class="filters">
+      <input id="searchDoc" placeholder="Search by name, department, phone, email or BD..." oninput="renderDoctors()">
+      <select id="filterStatus" onchange="renderDoctors()">
+        <option value="">All statuses</option>
+      </select>
+    </div>
+    <div class="list-tools">
+      <span id="doctorCount"></span>
+      <span><button class="link-btn" onclick="setAllDoctors(true)">Expand all</button> · <button class="link-btn" onclick="setAllDoctors(false)">Collapse all</button></span>
+    </div>
     <div id="doctorList"></div>
   </div>
 
@@ -664,6 +700,7 @@
         <div>
           <label>Next action date</label>
           <input id="c_next" type="date">
+          <div class="hint">Becomes the doctor's next follow-up. Leave empty to clear it.</div>
         </div>
       </div>
       <label>Call notes</label>
@@ -685,11 +722,14 @@
   <!-- SHEET LOG -->
   <div class="view" id="view-sheet">
     <h2 class="section-title"><i class="fa-solid fa-table"></i> GOOGLE SHEET</h2>
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px;">
-      <h3 class="big" style="margin-bottom:6px;">Entries submitted to the sheet</h3>
-      <button class="btn small ghost" onclick="loadSheetLog()">Refresh</button>
+    <div class="page-head">
+      <h3 class="big">Sheet activity log</h3>
+      <div class="page-actions">
+        <a class="btn small ghost" id="openSheetLink" href="#" target="_blank" rel="noopener" style="text-decoration:none;">Open Google Sheet</a>
+        <button class="btn small ghost" onclick="refreshFromSheet()">Refresh</button>
+      </div>
     </div>
-    <p style="font-size:13px;color:#475569;margin-top:-6px;margin-bottom:16px;">Pulled directly from the linked Google Sheet — this reflects what has actually been submitted, across all devices.</p>
+    <p class="page-sub">Every change saved to the sheet by anyone on the team, newest first. Read from the sheet's Activity tab.</p>
     <div class="card">
       <div id="sheetLogStatus" class="empty">Loading...</div>
       <div id="sheetLogList"></div>
@@ -699,30 +739,31 @@
   <!-- ABOUT -->
   <div class="view" id="view-about">
     <h2 class="section-title"><i class="fa-solid fa-circle-info"></i> FOR THE PITCH</h2>
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px;">
-      <h3 class="big" style="margin-bottom:6px;">What is DigiDr, and how do you explain it?</h3>
+    <div class="page-head">
+      <h3 class="big">What is DigiDr, and how do you explain it?</h3>
       <div id="aboutEditControls">
         <button class="btn small" id="aboutEditBtn" onclick="toggleAboutEdit()">Edit</button>
       </div>
     </div>
-    <p style="font-size:13px;color:#475569;margin-top:-6px;margin-bottom:16px;">This section is a placeholder — fill it in with the real pitch whenever it's ready. Anyone on the team can edit it, and it's saved for everyone.</p>
+    <p class="page-sub">Anyone on the team can edit this. It's saved to the sheet's Pitch tab, so everyone sees the same version.</p>
 
     <div class="card about-block" id="aboutView">
       <h4>What is DigiDr</h4>
-      <p id="ab_what_view" class="placeholder-text">To be filled — one or two lines on what DigiDr's AI infrastructure for doctors actually is.</p>
+      <p id="ab_what_view" class="placeholder-text"></p>
 
       <h4>Why a doctor should care</h4>
-      <p id="ab_why_view" class="placeholder-text">To be filled — the benefits a doctor gets from this AI infrastructure.</p>
+      <p id="ab_why_view" class="placeholder-text"></p>
 
       <h4>How onboarding works</h4>
-      <p id="ab_steps_view" class="placeholder-text">To be filled — the onboarding steps, one per line.</p>
+      <div id="ab_steps_view"></div>
 
-      <div class="time-badge">⏱ Onboarding takes just 10–12 minutes</div>
+      <div class="time-badge" id="ab_time_view"></div>
+      <div class="meta-line" id="ab_meta"></div>
     </div>
 
     <div class="card" id="scriptView">
       <h2 class="section-title"><i class="fa-solid fa-message"></i> CALL SCRIPT — QUICK REFERENCE</h2>
-      <p id="ab_script_view" class="placeholder-text" style="font-size:14.5px;line-height:1.7;">To be filled — the exact opening line to use on a cold call.</p>
+      <p id="ab_script_view" class="placeholder-text" style="font-size:14.5px;line-height:1.7;white-space:pre-line;"></p>
     </div>
 
     <!-- Edit mode -->
@@ -739,13 +780,11 @@
       <label>Onboarding time badge text</label>
       <input id="ab_time" placeholder="Onboarding takes just 10–12 minutes">
 
-      <button class="btn" style="margin-top:14px;" onclick="saveAbout()">Save</button>
-      <button class="btn ghost" style="margin-top:14px;" onclick="toggleAboutEdit()">Cancel</button>
-    </div>
-
-    <div class="card" id="scriptEdit" style="display:none;">
       <label>Call script — quick reference</label>
       <textarea id="ab_script" style="min-height:100px;" placeholder="e.g. Hi Doctor, I'm calling from DigiDr — we run the AI infrastructure that handles..."></textarea>
+
+      <button class="btn" style="margin-top:14px;" onclick="saveAbout()">Save</button>
+      <button class="btn ghost" style="margin-top:14px;" onclick="toggleAboutEdit()">Cancel</button>
     </div>
   </div>
 
@@ -770,19 +809,121 @@
   </div>
 </div>
 
+<!-- Edit doctor modal -->
+<div class="modal-bg" id="editModal">
+  <div class="modal wide">
+    <h3>Edit doctor</h3>
+    <div class="row2">
+      <div>
+        <label>Doctor's name *</label>
+        <input id="e_name">
+      </div>
+      <div>
+        <label>Email ID</label>
+        <input id="e_email" type="email">
+        <span class="field-error-msg" id="e_email_err">Enter a valid email address.</span>
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label>Mobile number</label>
+        <input id="e_mobile" type="tel">
+        <span class="field-error-msg" id="e_mobile_err">Enter a valid phone number.</span>
+      </div>
+      <div>
+        <label>Department / Speciality</label>
+        <select id="e_dept" class="dept-select"></select>
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label>Onboarding status</label>
+        <select id="e_status" class="status-select"></select>
+      </div>
+      <div>
+        <label>Next follow-up date</label>
+        <input id="e_followup" type="date">
+      </div>
+    </div>
+    <label>Remarks</label>
+    <textarea id="e_remarks"></textarea>
+    <div class="modal-actions">
+      <button class="btn" onclick="saveEdit()">Save changes</button>
+      <button class="btn ghost" onclick="closeModal('editModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
 <!-- International Phone Input JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/intlTelInput.min.js"></script>
 <script>
-let doctors = [];
-let calls = [];
-let planNotes = [];
-let currentBD = null;
-let aboutContent = null;
+// Deployed Apps Script web app that connects this tracker to the Google Sheet.
+const API_URL = 'https://script.google.com/macros/s/AKfycbwGLK2963WbtKCXZrHqyu8Qk5A8OoBar0oMc0NWwCRuPLrrRYerFLSHRdQKmo7CfiCaGg/exec';
+// Only needed if TEAM_KEY is set in apps-script/Code.gs; must match it.
+const TEAM_KEY = '';
+const FALLBACK_SHEET_URL = 'https://docs.google.com/spreadsheets/d/17l2AlEBAbRfi8C2c7_QmCpo0cERbKtf-sPKgUf2-s1w/edit';
+
+const DEPTS = ['Cardiology','Dentistry','Urology','Dermatology','Orthopedics','Pediatrics','Gynecology','ENT','General Physician','Neurology','Psychiatry','Ophthalmology','Other'];
+const STATUSES = ['New','Contacted','Onboarded','Not Interested'];
+const CLOSED_STATUSES = ['Onboarded','Not Interested'];
 const ABOUT_DEFAULT_TIME = 'Onboarding takes just 10–12 minutes';
 
-// ---------- phone inputs (intl-tel-input, country code selector + validation) ----------
+// Shared data, mirrored from the Sheet. `outbox` holds changes not yet saved to it.
+let db = {doctors:[], calls:[], plan:[], pitch:{}, activity:[], sheetUrl:''};
+let outbox = [];
+let currentBD = null;
+let editingId = null;
+
+// ---------- small utils ----------
+function ymd(d){
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+const todayStr = () => ymd(new Date());
+function dayOffset(n){ const d = new Date(); d.setDate(d.getDate()+n); return ymd(d); }
+function fmtDate(d){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d||'')) return d || '';
+  return new Date(d+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+}
+const timeNow = () => new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+const newId = (p) => p + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const digits = (s) => (s||'').replace(/\D/g,'');
+
+function escapeHtml(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+let toastTimer = null;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.style.display='none', 2600);
+}
+
+function fillSelect(sel, options, value){
+  sel.innerHTML = options.map(o => `<option>${escapeHtml(o)}</option>`).join('');
+  setSelect(sel, value);
+}
+// Sets a select's value, adding the option first if the sheet holds a value not in the list.
+function setSelect(sel, value){
+  if(value == null || value === '') return;
+  if(![...sel.options].some(o => o.value === value)){
+    const opt = document.createElement('option');
+    opt.textContent = value;
+    sel.appendChild(opt);
+  }
+  sel.value = value;
+}
+
+function closeModal(id){ document.getElementById(id).classList.remove('active'); }
+
+// ---------- phone & email inputs ----------
 let bdPhoneIti = null;
 let docMobileIti = null;
+let editMobileIti = null;
 
 function setupPhoneInput(inputEl){
   const iti = window.intlTelInput(inputEl, {
@@ -827,12 +968,23 @@ function validatePhone(iti, inputEl, required){
     clearPhoneError(inputEl);
     return true;
   }
-  if(!iti || !iti.isValidNumber || !iti.isValidNumber()){
+  // utils.js (which does real validation) may not have loaded, e.g. offline.
+  const valid = window.intlTelInputUtils ? iti.isValidNumber() : /^\d{7,15}$/.test(val);
+  if(!valid){
     showFieldError(inputEl, 'Enter a valid phone number.');
     return false;
   }
   clearPhoneError(inputEl);
   return true;
+}
+function phoneValue(iti, inputEl){
+  if(!inputEl.value.trim()) return '';
+  return window.intlTelInputUtils ? iti.getNumber() : '+' + iti.getSelectedCountryData().dialCode + inputEl.value.trim();
+}
+function setPhone(iti, inputEl, value){
+  inputEl.value = '';
+  if(value) iti.setNumber(value);
+  clearPhoneError(inputEl);
 }
 function showFieldError(inputEl, msg){
   inputEl.classList.add('error');
@@ -841,206 +993,201 @@ function showFieldError(inputEl, msg){
 }
 function validateEmail(inputEl, required){
   const val = inputEl.value.trim();
-  if(!val){
-    if(required){ showFieldError(inputEl, 'Email address is required.'); return false; }
+  const clear = () => {
     inputEl.classList.remove('error');
     const err = document.getElementById(inputEl.id + '_err');
     if(err) err.classList.remove('show');
+  };
+  if(!val){
+    if(required){ showFieldError(inputEl, 'Email address is required.'); return false; }
+    clear();
     return true;
   }
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){
     showFieldError(inputEl, 'Enter a valid email address.');
     return false;
   }
-  inputEl.classList.remove('error');
-  const err = document.getElementById(inputEl.id + '_err');
-  if(err) err.classList.remove('show');
+  clear();
   return true;
 }
 
-// ---------- Google Form sync ----------
-const GFORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfphfY7K9u2U3GnWCvxDRxEO2ZqCH4Hg8nLoVis7vi8evgH6w/formResponse';
-const GFORM_ENTRIES = {
-  docName:      'entry.1405913601',
-  docEmail:     'entry.180651018',
-  docMobile:    'entry.223753319',
-  dept:         'entry.2090855847',
-  status:       'entry.1620568894',
-  followup:     'entry.1862334612',
-  remarks:      'entry.1116474402',
-  bdName:       'entry.774555674',
-  bdEmail:      'entry.1806136066',
-  bdPhone:      'entry.1414656622',
-  callOutcome:  'entry.613849234',
-  callNotes:    'entry.311009367',
-  callNext:     'entry.1977489223'
-};
-async function submitToSheet(fields){
+// ---------- local persistence (cache + pending changes) ----------
+function lsGet(key, fallback){
+  try{ const v = localStorage.getItem('digidr_'+key); return v ? JSON.parse(v) : fallback; }
+  catch(e){ return fallback; }
+}
+function lsSet(key, value){
+  try{ localStorage.setItem('digidr_'+key, JSON.stringify(value)); }catch(e){}
+}
+const saveCache = () => lsSet('cache', db);
+const saveOutbox = () => lsSet('outbox', outbox);
+
+const getApiUrl = () => API_URL;
+const getTeamKey = () => TEAM_KEY;
+
+// ---------- Google Sheet sync (Apps Script web app) ----------
+class ApiError extends Error{}
+
+async function api(action, data, url){
+  url = url || getApiUrl();
+  if(!url) throw new Error('Sheet not connected');
+  // text/plain body keeps this a "simple" request, so no CORS preflight is needed.
+  const res = await fetch(url, {
+    method: 'POST',
+    body: JSON.stringify({action, data, key: getTeamKey(), by: currentBD ? currentBD.name : ''})
+  });
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  let j;
+  try{ j = await res.json(); }
+  catch(e){ throw new Error('Unexpected response — check the URL and that access is "Anyone"'); }
+  if(!j.ok){
+    const err = new ApiError(j.error || 'Sheet error');
+    err.retry = !!j.retry; // sheet was busy (e.g. many people saving at once) — try again later
+    throw err;
+  }
+  return j.result;
+}
+
+function setSync(state, text){
+  document.getElementById('syncStatus').className = 'sync ' + state;
+  document.getElementById('syncText').textContent = text;
+}
+function pendingText(){ return `${outbox.length} change${outbox.length===1?'':'s'} not saved to sheet yet`; }
+
+// Queue a change for the sheet. Local state is already updated by the caller,
+// and the queue survives reloads, so nothing is lost when offline.
+let localWrites = 0; // bumped on every local change, so a refresh can tell its data may be stale
+function enqueue(action, data){
+  localWrites++;
+  outbox.push({action, data});
+  saveOutbox();
+  saveCache();
+  flushOutbox().then(ok => { if(ok) scheduleRefresh(); });
+}
+
+let flushing = null;
+function flushOutbox(){
+  if(flushing) return flushing;
+  flushing = (async () => {
+    let sent = 0;
+    while(outbox.length){
+      if(!getApiUrl()){ setSync('err', pendingText() + ' — sheet not connected'); return false; }
+      setSync('busy', 'Saving to sheet…');
+      try{
+        await api(outbox[0].action, outbox[0].data);
+      }catch(e){
+        if(e instanceof ApiError && !e.retry){
+          // The sheet rejected this change; retrying won't help, so drop it.
+          showToast('Sheet rejected a change: ' + e.message);
+        } else {
+          setSync('err', pendingText() + ' — will retry');
+          return false;
+        }
+      }
+      outbox.shift();
+      saveOutbox();
+      sent++;
+    }
+    if(sent) setSync('ok', 'Saved to sheet · ' + timeNow());
+    return true;
+  })();
+  flushing.finally(() => { flushing = null; });
+  return flushing;
+}
+
+let refreshTimer = null;
+function scheduleRefresh(){
+  clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(() => refreshFromSheet(true), 1500);
+}
+
+let refreshing = false;
+let refreshQueued = false;
+async function refreshFromSheet(silent){
+  if(!getApiUrl()){
+    setSync('err', outbox.length ? pendingText() + ' — sheet not connected' : 'Sheet not connected');
+    renderSheetLog();
+    return;
+  }
+  if(refreshing){ refreshQueued = true; return; }
+  refreshing = true;
   try{
-    const body = new URLSearchParams();
-    Object.keys(fields).forEach(key=>{
-      const entryId = GFORM_ENTRIES[key];
-      if(entryId) body.append(entryId, fields[key] || '');
-    });
-    await fetch(GFORM_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: {'Content-Type':'application/x-www-form-urlencoded'},
-      body: body.toString()
-    });
+    const flushed = await flushOutbox();
+    if(!flushed) return; // keep local changes on screen until they reach the sheet
+    if(!silent) setSync('busy', 'Loading from sheet…');
+    const writesAtStart = localWrites;
+    const r = await api('getAll', {});
+    // A change made while loading may be missing from this snapshot; showing it would
+    // briefly undo that change. Drop the snapshot and load again.
+    if(outbox.length || localWrites !== writesAtStart){ refreshQueued = true; return; }
+    db = {
+      doctors: r.doctors || [], calls: r.calls || [], plan: r.plan || [],
+      pitch: r.pitch || {}, activity: r.activity || [], sheetUrl: r.sheetUrl || ''
+    };
+    saveCache();
+    renderAll(true);
+    setSync('ok', 'Synced · ' + timeNow());
   }catch(e){
-    // Sheet sync failing shouldn't block the app — data is still saved locally
-    console.warn('Google Sheet sync failed', e);
+    setSync('err', e instanceof ApiError ? e.message : 'Could not reach the sheet — showing last saved copy');
+  }finally{
+    refreshing = false;
+    if(refreshQueued){ refreshQueued = false; setTimeout(() => refreshFromSheet(true), 300); }
   }
 }
-const todayStr = () => new Date().toISOString().slice(0,10);
-const fmtDate = (d) => new Date(d+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
 
-function showToast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.display = 'block';
-  setTimeout(()=>t.style.display='none', 2200);
-}
 
-// ---------- storage helpers ----------
-// Uses window.storage when available (host-provided, shared across devices),
-// falling back to localStorage (this browser only) so the app works when
-// opened directly as a local file too.
-async function storageGet(key){
-  if(window.storage && window.storage.get){
-    try{
-      const r = await window.storage.get(key, true);
-      if(r) return r.value;
-    }catch(e){ /* fall through to localStorage */ }
-  }
-  return localStorage.getItem('digidr_'+key);
+// ---------- tabs ----------
+function showView(name){
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.view === name));
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-'+name));
+  const active = document.querySelector('.tab-btn.active');
+  if(active) active.scrollIntoView({block:'nearest', inline:'center'});
+  renderView(name);
 }
-async function storageSet(key, value){
-  let ok = false;
-  if(window.storage && window.storage.set){
-    try{ await window.storage.set(key, value, true); ok = true; }
-    catch(e){ /* fall through to localStorage */ }
-  }
-  try{ localStorage.setItem('digidr_'+key, value); ok = true; }catch(e){}
-  return ok;
+function renderView(name){
+  if(name==='dashboard') renderDashboard();
+  if(name==='doctors') renderDoctors();
+  if(name==='calls') renderCalls();
+  if(name==='sheet') renderSheetLog();
+  if(name==='about') renderAbout();
 }
-
-async function loadAll(){
-  try{
-    const d = await storageGet('doctors');
-    doctors = d ? JSON.parse(d) : [];
-  }catch(e){ doctors = []; }
-  try{
-    const c = await storageGet('calls');
-    calls = c ? JSON.parse(c) : [];
-  }catch(e){ calls = []; }
-  try{
-    const p = await storageGet('planNotes');
-    planNotes = p ? JSON.parse(p) : [];
-  }catch(e){ planNotes = []; }
-  try{
-    const bd = localStorage.getItem('digidr_currentBD');
-    currentBD = bd ? JSON.parse(bd) : null;
-  }catch(e){ currentBD = null; }
-  try{
-    const ab = await storageGet('aboutContent');
-    aboutContent = ab ? JSON.parse(ab) : null;
-  }catch(e){ aboutContent = null; }
-}
-async function saveDoctors(){
-  const ok = await storageSet('doctors', JSON.stringify(doctors));
-  if(!ok) showToast('Could not save — try again');
-}
-async function saveCalls(){
-  const ok = await storageSet('calls', JSON.stringify(calls));
-  if(!ok) showToast('Could not save — try again');
-}
-async function savePlanNotes(){
-  const ok = await storageSet('planNotes', JSON.stringify(planNotes));
-  if(!ok) showToast('Could not save — try again');
-}
-
-// ---------- about section (fill-later) ----------
-function renderAbout(){
-  const c = aboutContent;
-  document.getElementById('ab_what_view').textContent = c && c.what ? c.what : 'To be filled — one or two lines on what DigiDr\'s AI infrastructure for doctors actually is.';
-  document.getElementById('ab_what_view').classList.toggle('placeholder-text', !(c && c.what));
-
-  document.getElementById('ab_why_view').textContent = c && c.why ? c.why : 'To be filled — the benefits a doctor gets from this AI infrastructure.';
-  document.getElementById('ab_why_view').classList.toggle('placeholder-text', !(c && c.why));
-
-  const stepsHtml = (c && c.steps && c.steps.length)
-    ? '<ol class="steps">' + c.steps.map(s=>`<li>${escapeHtml(s)}</li>`).join('') + '</ol>'
-    : '<p class="placeholder-text">To be filled — the onboarding steps, one per line.</p>';
-  document.getElementById('ab_steps_view').outerHTML = `<div id="ab_steps_view">${stepsHtml}</div>`;
-
-  document.querySelector('.time-badge').textContent = '⏱ ' + (c && c.time ? c.time : ABOUT_DEFAULT_TIME);
-
-  document.getElementById('ab_script_view').textContent = c && c.script ? c.script : 'To be filled — the exact opening line to use on a cold call.';
-  document.getElementById('ab_script_view').classList.toggle('placeholder-text', !(c && c.script));
-}
-function toggleAboutEdit(){
-  const editing = document.getElementById('aboutEdit').style.display !== 'none';
-  if(editing){
-    document.getElementById('aboutEdit').style.display = 'none';
-    document.getElementById('scriptEdit').style.display = 'none';
-    document.getElementById('aboutView').style.display = '';
-    document.getElementById('scriptView').style.display = '';
-    document.getElementById('aboutEditBtn').textContent = 'Edit';
-  } else {
-    const c = aboutContent || {};
-    document.getElementById('ab_what').value = c.what || '';
-    document.getElementById('ab_why').value = c.why || '';
-    document.getElementById('ab_steps').value = (c.steps || []).join('\n');
-    document.getElementById('ab_time').value = c.time || ABOUT_DEFAULT_TIME;
-    document.getElementById('ab_script').value = c.script || '';
-    document.getElementById('aboutEdit').style.display = '';
-    document.getElementById('scriptEdit').style.display = '';
-    document.getElementById('aboutView').style.display = 'none';
-    document.getElementById('scriptView').style.display = 'none';
-    document.getElementById('aboutEditBtn').textContent = 'Editing…';
-  }
-}
-async function saveAbout(){
-  aboutContent = {
-    what: document.getElementById('ab_what').value.trim(),
-    why: document.getElementById('ab_why').value.trim(),
-    steps: document.getElementById('ab_steps').value.split('\n').map(s=>s.trim()).filter(Boolean),
-    time: document.getElementById('ab_time').value.trim() || ABOUT_DEFAULT_TIME,
-    script: document.getElementById('ab_script').value.trim()
+// fromSync: a background refresh shouldn't re-render a screen the user is
+// interacting with (it would close an open dropdown or date picker).
+function renderAll(fromSync){
+  const busy = (viewId) => {
+    const a = document.activeElement;
+    return fromSync && a && a !== document.body && document.getElementById(viewId).contains(a);
   };
-  const ok = await storageSet('aboutContent', JSON.stringify(aboutContent));
-  showToast(ok ? 'Saved' : 'Could not save — try again');
+  if(!busy('view-dashboard')) renderDashboard();
+  if(!busy('view-doctors')) renderDoctors();
+  if(!busy('view-calls')) renderCalls();
+  renderSheetLog();
   renderAbout();
-  toggleAboutEdit();
 }
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    showView(btn.dataset.view);
+    refreshFromSheet(true);
+  });
+});
 
 // ---------- BD identity ----------
 function renderBDStrip(){
-  const strip = document.getElementById('bdStrip');
-  if(!currentBD){
-    strip.innerHTML = `<div class="who">No BD signed in</div><button onclick="openBDModal()">Sign in</button>`;
-    return;
-  }
-  strip.innerHTML = `<div class="who">Calling as <strong>${escapeHtml(currentBD.name)}</strong> · ${escapeHtml(currentBD.email)} · ${escapeHtml(currentBD.phone)}</div><button onclick="openBDModal()">Switch user</button>`;
+  document.getElementById('bdWho').innerHTML = currentBD
+    ? `Calling as <strong>${escapeHtml(currentBD.name)}</strong> · ${escapeHtml(currentBD.email || 'no email')} · ${escapeHtml(currentBD.phone)}`
+    : 'No BD signed in';
+  document.getElementById('bdBtn').textContent = currentBD ? 'Switch user' : 'Sign in';
 }
 function openBDModal(){
   document.getElementById('bdModal').classList.add('active');
-  if(!bdPhoneIti){
-    bdPhoneIti = setupPhoneInput(document.getElementById('bd_phone'));
-  }
+  if(!bdPhoneIti) bdPhoneIti = setupPhoneInput(document.getElementById('bd_phone'));
   if(currentBD){
     document.getElementById('bd_name').value = currentBD.name;
     document.getElementById('bd_email').value = currentBD.email;
-    if(bdPhoneIti && bdPhoneIti.setNumber){
-      bdPhoneIti.setNumber(currentBD.phone || '');
-    } else {
-      document.getElementById('bd_phone').value = currentBD.phone;
-    }
+    setPhone(bdPhoneIti, document.getElementById('bd_phone'), currentBD.phone);
   }
 }
-async function saveBD(){
+function saveBD(){
   const name = document.getElementById('bd_name').value.trim();
   const emailEl = document.getElementById('bd_email');
   const phoneEl = document.getElementById('bd_phone');
@@ -1048,138 +1195,24 @@ async function saveBD(){
   const emailOk = validateEmail(emailEl, false);
   const phoneOk = validatePhone(bdPhoneIti, phoneEl, true);
   if(!emailOk || !phoneOk){ showToast('Please fix the highlighted fields'); return; }
-  const fullPhone = bdPhoneIti && bdPhoneIti.getNumber ? bdPhoneIti.getNumber() : phoneEl.value.trim();
-  currentBD = {name, email: emailEl.value.trim(), phone: fullPhone};
-  try{ localStorage.setItem('digidr_currentBD', JSON.stringify(currentBD)); }catch(e){}
-  document.getElementById('bdModal').classList.remove('active');
+  currentBD = {name, email: emailEl.value.trim(), phone: phoneValue(bdPhoneIti, phoneEl)};
+  lsSet('currentBD', currentBD);
+  closeModal('bdModal');
   renderBDStrip();
   showToast('Signed in as ' + name);
 }
-
-// ---------- tabs ----------
-document.querySelectorAll('.tab-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('view-'+btn.dataset.view).classList.add('active');
-    if(btn.dataset.view==='dashboard') renderDashboard();
-    if(btn.dataset.view==='doctors') renderDoctors();
-    if(btn.dataset.view==='calls') renderCalls();
-    if(btn.dataset.view==='sheet') loadSheetLog();
-    if(btn.dataset.view==='about') renderAbout();
-  });
-});
-
-// ---------- Sheet Log (read-only pull from the linked Google Sheet) ----------
-const SHEET_ID = '17l2AlEBAbRfi8C2c7_QmCpo0cERbKtf-sPKgUf2-s1w';
-let sheetJsonpCounter = 0;
-
-// Fetches all rows from the linked Sheet via its JSONP gviz endpoint (avoids
-// CORS restrictions on the plain CSV/JSON export). Calls onRows(rowObjects)
-// on success, or onError(err) on failure/timeout.
-function fetchSheetRows(onRows, onError){
-  const callbackName = 'digidrSheetCallback_' + (sheetJsonpCounter++);
-  const scriptId = 'sheetFetchScript_' + callbackName;
-
-  const timeout = setTimeout(()=>{
-    delete window[callbackName];
-    onError(new Error('timeout'));
-  }, 10000);
-
-  window[callbackName] = function(resp){
-    clearTimeout(timeout);
-    delete window[callbackName];
-    const script = document.getElementById(scriptId);
-    if(script) script.remove();
-    try{
-      if(!resp || !resp.table || !resp.table.rows){
-        onRows([]);
-        return;
-      }
-      const headers = (resp.table.cols || []).map(c => c.label || c.id || '');
-      const dataRows = resp.table.rows
-        .map(r => (r.c || []).map(cell => cell && cell.f != null ? cell.f : (cell && cell.v != null ? String(cell.v) : '')))
-        .filter(r => r.some(v => (v||'').trim() !== ''));
-      const rowObjects = dataRows.map(r => {
-        const obj = {};
-        headers.forEach((h, i) => obj[h] = (r[i]||'').trim());
-        return obj;
-      });
-      onRows(rowObjects);
-    }catch(e){
-      onError(e);
-    }
-  };
-
-  const script = document.createElement('script');
-  script.id = scriptId;
-  script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json;responseHandler:${callbackName}&_=${Date.now()}`;
-  script.onerror = () => {
-    clearTimeout(timeout);
-    delete window[callbackName];
-    onError(new Error('script load failed'));
-  };
-  document.body.appendChild(script);
-}
-
-function loadSheetLog(){
-  const statusEl = document.getElementById('sheetLogStatus');
-  const listEl = document.getElementById('sheetLogList');
-  statusEl.textContent = 'Loading...';
-  statusEl.style.display = '';
-  listEl.innerHTML = '';
-
-  fetchSheetRows(
-    (rows) => {
-      if(rows.length === 0){
-        statusEl.textContent = 'No entries in the sheet yet.';
-        return;
-      }
-      statusEl.style.display = 'none';
-      const fullWidthFields = ['Remarks', 'Call Notes'];
-      listEl.innerHTML = rows.slice().reverse().map((obj, idx) => {
-        const name = obj['Doctor Name'] || obj['BD Name'] || 'Entry';
-        const preview = obj['Speciality'] || obj['Status'] || obj['Call Outcome'] || '';
-        const fields = Object.keys(obj).filter(h => h !== 'Timestamp' && h !== 'Doctor Name' && obj[h]);
-        return `<div class="sheet-entry" id="sheetEntry${idx}">
-          <div class="sheet-entry-top" onclick="toggleSheetEntry(${idx})">
-            <div class="sheet-entry-top-left">
-              <i class="fa-solid fa-chevron-right sheet-entry-chevron"></i>
-              <span class="sheet-entry-name">${escapeHtml(name)}</span>
-              <span class="sheet-entry-preview">${escapeHtml(preview)}</span>
-            </div>
-            <span class="sheet-entry-time">${escapeHtml(obj['Timestamp']||'')}</span>
-          </div>
-          <div class="sheet-entry-body">
-            <div class="sheet-entry-grid">
-              ${fields.map(h => `<div class="sheet-entry-field${fullWidthFields.includes(h) ? ' full' : ''}"><span class="k">${escapeHtml(h)}</span><span class="v">${h==='Status' ? `<span class="sheet-status-tag">${escapeHtml(obj[h])}</span>` : escapeHtml(obj[h])}</span></div>`).join('')}
-            </div>
-          </div>
-        </div>`;
-      }).join('');
-    },
-    (err) => {
-      statusEl.textContent = 'Could not load the sheet — check it is shared as "Anyone with the link can view".';
-      console.warn('Sheet log load failed', err);
-    }
-  );
-}
-
-function escapeHtml(s){
-  return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-function toggleSheetEntry(idx){
-  const el = document.getElementById('sheetEntry'+idx);
-  if(el) el.classList.toggle('open');
+function requireBD(){
+  if(currentBD) return true;
+  openBDModal();
+  showToast('Please sign in first');
+  return false;
 }
 
 // ---------- add doctor ----------
-async function saveDoctor(){
+function saveDoctor(){
   const name = document.getElementById('f_name').value.trim();
   if(!name){ showToast('Doctor name is required'); return; }
-  if(!currentBD){ openBDModal(); showToast('Please sign in first'); return; }
+  if(!requireBD()) return;
 
   const emailEl = document.getElementById('f_email');
   const mobileEl = document.getElementById('f_mobile');
@@ -1187,257 +1220,464 @@ async function saveDoctor(){
   const mobileOk = validatePhone(docMobileIti, mobileEl, false);
   if(!emailOk || !mobileOk){ showToast('Please fix the highlighted fields'); return; }
 
-  const mobileVal = mobileEl.value.trim() ? (docMobileIti && docMobileIti.getNumber ? docMobileIti.getNumber() : mobileEl.value.trim()) : '';
+  const email = emailEl.value.trim();
+  const mobile = phoneValue(docMobileIti, mobileEl);
+  const dup = db.doctors.find(d =>
+    (mobile && digits(d.mobile) && digits(d.mobile) === digits(mobile)) ||
+    (email && d.email && d.email.toLowerCase() === email.toLowerCase()));
+  if(dup && !confirm(`${dup.name} has the same phone/email and was already added by ${dup.addedBy || 'someone'}. Add anyway?`)) return;
 
   const doc = {
-    id: 'd'+Date.now(),
-    name,
-    email: emailEl.value.trim(),
-    mobile: mobileVal,
+    id: newId('d'),
+    name, email, mobile,
     dept: document.getElementById('f_dept').value,
     status: document.getElementById('f_status').value,
     followup: document.getElementById('f_followup').value,
     remarks: document.getElementById('f_remarks').value.trim(),
     addedBy: currentBD.name,
+    addedByEmail: currentBD.email,
     addedOn: todayStr()
   };
-  doctors.push(doc);
-  await saveDoctors();
-  submitToSheet({
-    docName: doc.name, docEmail: doc.email, docMobile: doc.mobile,
-    dept: doc.dept, status: doc.status, followup: doc.followup, remarks: doc.remarks,
-    bdName: currentBD.name, bdEmail: currentBD.email, bdPhone: currentBD.phone
-  });
-  ['f_name','f_email','f_mobile','f_remarks','f_followup'].forEach(id=>document.getElementById(id).value='');
+  db.doctors.push(doc);
+  enqueue('saveDoctor', doc);
+
+  ['f_name','f_email','f_mobile','f_remarks','f_followup'].forEach(id => document.getElementById(id).value = '');
   clearPhoneError(mobileEl);
   emailEl.classList.remove('error');
-  document.getElementById('f_dept').value = 'Cardiology';
-  document.getElementById('f_status').value = 'New';
+  document.getElementById('f_dept').value = DEPTS[0];
+  document.getElementById('f_status').value = STATUSES[0];
   showToast('Doctor saved');
-  renderDashboard();
+  renderAll();
+}
+
+// ---------- doctor updates (shared by list, edit modal and call log) ----------
+function findDoctor(id){ return db.doctors.find(d => d.id === id); }
+
+function updateDoctor(id, patch){
+  const d = findDoctor(id);
+  if(!d || !requireBD()) return false;
+  Object.assign(d, patch, {updatedBy: currentBD.name});
+  enqueue('saveDoctor', Object.assign({id}, patch));
+  renderAll();
+  return true;
+}
+function updateStatus(id, status){
+  if(updateDoctor(id, {status})) showToast('Status updated');
+  else renderDoctors();
+}
+function setFollowup(id, date){
+  if(updateDoctor(id, {followup: date})) showToast(date ? 'Follow-up set for ' + fmtDate(date) : 'Follow-up cleared');
+  else renderDoctors();
+}
+function deleteDoctor(id){
+  const d = findDoctor(id);
+  if(!d || !requireBD()) return;
+  if(!confirm(`Delete ${d.name}? This removes them from the shared sheet for everyone.`)) return;
+  db.doctors = db.doctors.filter(x => x.id !== id);
+  enqueue('deleteDoctor', {id});
+  renderAll();
+  showToast('Doctor deleted');
+}
+
+function openEdit(id){
+  const d = findDoctor(id);
+  if(!d) return;
+  editingId = id;
+  if(!editMobileIti) editMobileIti = setupPhoneInput(document.getElementById('e_mobile'));
+  document.getElementById('e_name').value = d.name || '';
+  document.getElementById('e_email').value = d.email || '';
+  validateEmail(document.getElementById('e_email'), false);
+  setPhone(editMobileIti, document.getElementById('e_mobile'), d.mobile);
+  setSelect(document.getElementById('e_dept'), d.dept || DEPTS[0]);
+  setSelect(document.getElementById('e_status'), d.status || STATUSES[0]);
+  document.getElementById('e_followup').value = d.followup || '';
+  document.getElementById('e_remarks').value = d.remarks || '';
+  document.getElementById('editModal').classList.add('active');
+}
+function saveEdit(){
+  const d = findDoctor(editingId);
+  if(!d){ closeModal('editModal'); return; }
+  const name = document.getElementById('e_name').value.trim();
+  if(!name){ showToast('Doctor name is required'); return; }
+  const emailEl = document.getElementById('e_email');
+  const mobileEl = document.getElementById('e_mobile');
+  const emailOk = validateEmail(emailEl, false);
+  const mobileOk = validatePhone(editMobileIti, mobileEl, false);
+  if(!emailOk || !mobileOk){ showToast('Please fix the highlighted fields'); return; }
+  const next = {
+    name,
+    email: emailEl.value.trim(),
+    mobile: phoneValue(editMobileIti, mobileEl),
+    dept: document.getElementById('e_dept').value,
+    status: document.getElementById('e_status').value,
+    followup: document.getElementById('e_followup').value,
+    remarks: document.getElementById('e_remarks').value.trim()
+  };
+  // Only send fields that changed, so we don't overwrite a teammate's edit to another field.
+  const patch = {};
+  Object.keys(next).forEach(k => { if((d[k] || '') !== next[k]) patch[k] = next[k]; });
+  closeModal('editModal');
+  if(!Object.keys(patch).length){ showToast('No changes'); return; }
+  if(updateDoctor(editingId, patch)) showToast('Doctor updated');
 }
 
 // ---------- doctor list ----------
-let sheetDoctors = null; // null = not loaded yet, [] = loaded, empty
-
-function doctorKey(name, mobile){
-  return (name||'').trim().toLowerCase() + '|' + (mobile||'').replace(/\D/g,'');
+function lastCallFor(docId){
+  let last = null, count = 0;
+  db.calls.forEach(c => {
+    if(c.docId !== docId) return;
+    count++;
+    if(!last || (c.time || c.date) > (last.time || last.date)) last = c;
+  });
+  return {last, count};
 }
 
-function loadSheetDoctors(onDone){
-  fetchSheetRows(
-    (rows) => {
-      sheetDoctors = rows.filter(obj => obj['Doctor Name']).map(obj => ({
-        id: null,
-        fromSheet: true,
-        name: obj['Doctor Name'],
-        email: obj['Doctor Email'] || '',
-        mobile: obj['Doctor Mobile'] || '',
-        dept: obj['Speciality'] || '',
-        status: obj['Status'] || 'New',
-        followup: obj['Follow-up Date'] || '',
-        remarks: obj['Remarks'] || '',
-        addedBy: obj['BD Name'] || '',
-        addedOn: obj['Timestamp'] || ''
-      }));
-      if(onDone) onDone();
-    },
-    (err) => {
-      console.warn('Could not load doctors from sheet', err);
-      sheetDoctors = sheetDoctors || [];
-      if(onDone) onDone();
-    }
-  );
-}
+// Which doctor cards are expanded; kept across re-renders and background syncs.
+const expandedDocs = new Set();
+let visibleDocIds = [];
 
-function mergedDoctorList(){
-  const localKeys = new Set(doctors.map(d => doctorKey(d.name, d.mobile)));
-  const fromSheet = (sheetDoctors || []).filter(d => !localKeys.has(doctorKey(d.name, d.mobile)));
-  return doctors.concat(fromSheet);
+function initials(name){
+  const parts = (name || '').replace(/^dr\.?\s+/i, '').trim().split(/\s+/).filter(Boolean);
+  return ((parts[0] || '?')[0] + (parts.length > 1 ? parts[parts.length-1][0] : '')).toUpperCase();
 }
-
-function refreshDoctorList(){
-  sheetDoctors = null;
+function toggleDoctor(id){
+  if(expandedDocs.has(id)) expandedDocs.delete(id); else expandedDocs.add(id);
+  const card = document.querySelector('.doc-card[data-id="' + CSS.escape(id) + '"]');
+  if(card){
+    const open = expandedDocs.has(id);
+    card.classList.toggle('open', open);
+    card.querySelector('.doc-head').setAttribute('aria-expanded', open);
+  }
+}
+function setAllDoctors(open){
+  visibleDocIds.forEach(id => open ? expandedDocs.add(id) : expandedDocs.delete(id));
   renderDoctors();
+}
+function dueChip(d, status){
+  if(!d.followup || CLOSED_STATUSES.includes(status)) return '';
+  const t = todayStr();
+  const cls = d.followup < t ? ' overdue' : d.followup === t ? ' today' : '';
+  const label = d.followup === t ? 'Due today' : (d.followup < t ? 'Overdue · ' : 'Follow-up ') + fmtDate(d.followup);
+  return `<span class="due-chip${cls}"><i class="fa-regular fa-calendar"></i> ${escapeHtml(label)}</span>`;
 }
 
 function renderDoctors(){
   const list = document.getElementById('doctorList');
-  const q = (document.getElementById('searchDoc').value || '').toLowerCase();
+  const q = (document.getElementById('searchDoc').value || '').toLowerCase().trim();
+  const statusFilter = document.getElementById('filterStatus').value;
 
-  if(sheetDoctors === null){
-    list.innerHTML = `<div class="empty">Loading doctors...</div>`;
-    loadSheetDoctors(() => renderDoctors());
-    return;
-  }
-
-  const all = mergedDoctorList();
-  const filtered = all.filter(d => d.name.toLowerCase().includes(q) || (d.dept||'').toLowerCase().includes(q));
-  if(filtered.length===0){
+  const filtered = db.doctors.filter(d => {
+    if(statusFilter && (d.status || 'New') !== statusFilter) return false;
+    if(!q) return true;
+    return [d.name, d.dept, d.mobile, d.email, d.addedBy].some(v => (v||'').toLowerCase().includes(q));
+  });
+  visibleDocIds = filtered.map(d => d.id);
+  document.getElementById('doctorCount').textContent = db.doctors.length
+    ? (filtered.length === db.doctors.length ? `${filtered.length} doctor${filtered.length===1?'':'s'}` : `${filtered.length} of ${db.doctors.length} doctors`)
+    : '';
+  if(!db.doctors.length){
     list.innerHTML = `<div class="empty">No doctors yet. Add your first lead from the "Add Doctor" tab.</div>`;
     return;
   }
-  list.innerHTML = filtered.slice().reverse().map(d => `
-    <div class="doc-card">
-      <div class="doc-top">
-        <div class="doc-name">${escapeHtml(d.name)}</div>
-        <span class="status-pill status-${(d.status||'New').replace(' ','-')}">${d.status||'New'}</span>
+  if(!filtered.length){
+    list.innerHTML = `<div class="empty">No doctors match this search.</div>`;
+    return;
+  }
+  list.innerHTML = filtered.slice().reverse().map(d => {
+    const id = escapeHtml(d.id);
+    const status = d.status || 'New';
+    const stClass = escapeHtml(status.replace(/\s+/g,'-'));
+    const open = expandedDocs.has(d.id);
+    const {last, count} = lastCallFor(d.id);
+    const overdue = d.followup && d.followup < todayStr() && !CLOSED_STATUSES.includes(status);
+    return `
+    <div class="doc-card st-${stClass}${open ? ' open' : ''}" data-id="${id}">
+      <div class="doc-head" role="button" tabindex="0" aria-expanded="${open}" data-id="${id}"
+           onclick="toggleDoctor(this.dataset.id)"
+           onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleDoctor(this.dataset.id);}">
+        <div class="doc-avatar">${escapeHtml(initials(d.name))}</div>
+        <div class="doc-main">
+          <div class="doc-name">${escapeHtml(d.name)}</div>
+          <div class="doc-sub">
+            ${d.dept ? `<span class="doc-dept">${escapeHtml(d.dept)}</span>` : ''}
+            ${d.mobile ? `<span>☎ ${escapeHtml(d.mobile)}</span>` : ''}
+            ${dueChip(d, status)}
+          </div>
+        </div>
+        <div class="doc-head-right">
+          <span class="status-pill status-${stClass}">${escapeHtml(status)}</span>
+          <i class="fa-solid fa-chevron-down doc-chevron"></i>
+        </div>
       </div>
-      ${(d.dept || d.fromSheet) ? `<div class="doc-badges">
-        ${d.dept ? `<span class="doc-dept">${escapeHtml(d.dept)}</span>` : ''}
-        ${d.fromSheet ? `<span class="doc-dept tag-sheet">From sheet</span>` : ''}
-      </div>` : ''}
-      <div class="doc-details">
-        ${d.email ? `✉ ${escapeHtml(d.email)}<br>` : ''}
-        ${d.mobile ? `☎ ${escapeHtml(d.mobile)}<br>` : ''}
-        ${d.followup ? `Next follow-up: ${fmtDate(d.followup)}<br>` : ''}
-        Added by ${escapeHtml(d.addedBy||'—')}${d.fromSheet ? ` on ${escapeHtml(d.addedOn)}` : ` on ${d.addedOn}`}
-      </div>
-      ${d.remarks ? `<div class="doc-remarks">${escapeHtml(d.remarks)}</div>` : ''}
-      ${d.fromSheet ? '' : `
-      <div class="doc-actions">
-        <select onchange="updateStatus('${d.id}', this.value)">
-          ${['New','Contacted','Onboarded','Not Interested'].map(s=>`<option ${s===d.status?'selected':''}>${s}</option>`).join('')}
-        </select>
-        <button class="btn small" onclick="setFollowup('${d.id}')">Set follow-up</button>
-        <button class="btn small ghost" onclick="deleteDoctor('${d.id}')">Delete</button>
-      </div>`}
-    </div>
-  `).join('');
-}
-async function updateStatus(id, status){
-  const d = doctors.find(x=>x.id===id);
-  if(d){ d.status = status; await saveDoctors(); renderDoctors(); renderDashboard(); }
-}
-async function setFollowup(id){
-  const d = doctors.find(x=>x.id===id);
-  if(!d) return;
-  const val = prompt('Follow-up date (YYYY-MM-DD)', d.followup || todayStr());
-  if(val){ d.followup = val; await saveDoctors(); renderDoctors(); renderDashboard(); showToast('Follow-up set'); }
-}
-async function deleteDoctor(id){
-  if(!confirm('Delete this doctor?')) return;
-  doctors = doctors.filter(x=>x.id!==id);
-  await saveDoctors();
-  renderDoctors(); renderDashboard();
+      <div class="doc-body"><div class="doc-body-inner"><div class="doc-body-pad">
+        <div class="doc-grid">
+          <div class="doc-field"><span class="k">Mobile</span><span class="v">${d.mobile ? `<a href="tel:${escapeHtml(d.mobile)}">${escapeHtml(d.mobile)}</a>` : '—'}</span></div>
+          <div class="doc-field"><span class="k">Email</span><span class="v">${d.email ? `<a href="mailto:${escapeHtml(d.email)}">${escapeHtml(d.email)}</a>` : '—'}</span></div>
+          <div class="doc-field"><span class="k">Next follow-up</span><span class="v${overdue ? ' overdue' : ''}">${d.followup ? escapeHtml(fmtDate(d.followup)) : '—'}</span></div>
+          <div class="doc-field"><span class="k">Added by</span><span class="v">${escapeHtml(d.addedBy || '—')}${d.addedOn ? ' · ' + escapeHtml(fmtDate(d.addedOn)) : ''}</span></div>
+          <div class="doc-field full"><span class="k">Last call</span><span class="v">${last ? `${escapeHtml(fmtDate(last.date))} · ${escapeHtml(last.outcome)} (by ${escapeHtml(last.by || '—')}) · ${count} call${count===1?'':'s'} total` : 'No calls yet'}</span></div>
+        </div>
+        ${d.remarks ? `<div class="doc-remarks">${escapeHtml(d.remarks)}</div>` : ''}
+        <div class="doc-actions">
+          <select data-id="${id}" onchange="updateStatus(this.dataset.id, this.value)" title="Status">
+            ${STATUSES.concat(STATUSES.includes(status) ? [] : [status]).map(s => `<option ${s===status?'selected':''}>${escapeHtml(s)}</option>`).join('')}
+          </select>
+          <input type="date" data-id="${id}" value="${escapeHtml(d.followup||'')}" onchange="setFollowup(this.dataset.id, this.value)" title="Next follow-up">
+          <span class="spacer"></span>
+          <button class="btn small clay" data-id="${id}" onclick="switchToCallTab(this.dataset.id)"><i class="fa-solid fa-phone"></i> Log call</button>
+          <button class="btn small ghost" data-id="${id}" onclick="openEdit(this.dataset.id)">Edit</button>
+          <button class="btn small danger" data-id="${id}" onclick="deleteDoctor(this.dataset.id)">Delete</button>
+        </div>
+      </div></div></div>
+    </div>`;
+  }).join('');
 }
 
 // ---------- dashboard ----------
-function renderDashboard(){
-  document.getElementById('dashDate').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long', day:'numeric', month:'long', year:'numeric'});
-  document.getElementById('statTotal').textContent = doctors.length;
-  document.getElementById('statOnboarded').textContent = doctors.filter(d=>d.status==='Onboarded').length;
+function planItemHtml(n){
+  return `<div class="followup-item">
+    <div><div class="fi-name" style="font-size:14px;font-weight:600;">${escapeHtml(n.text)}</div><div class="fi-meta">added by ${escapeHtml(n.by || '—')}</div></div>
+    <button class="plan-x" data-id="${escapeHtml(n.id)}" onclick="deletePlanNote(this.dataset.id)" title="Remove note">✕</button>
+  </div>`;
+}
 
+function renderDashboard(){
   const today = todayStr();
-  const due = doctors.filter(d => d.followup && d.followup <= today);
+  const tomorrow = dayOffset(1);
+  document.getElementById('dashDate').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  document.getElementById('statTotal').textContent = db.doctors.length;
+  document.getElementById('statOnboarded').textContent = db.doctors.filter(d => d.status === 'Onboarded').length;
+
+  const open = db.doctors.filter(d => !CLOSED_STATUSES.includes(d.status));
+  const due = open.filter(d => d.followup && d.followup <= today).sort((a,b) => a.followup.localeCompare(b.followup));
   document.getElementById('statDue').textContent = due.length;
 
-  const dueList = document.getElementById('dueList');
-  dueList.innerHTML = due.length ? due.map(d => `
+  document.getElementById('dueList').innerHTML = due.length ? due.map(d => `
     <div class="followup-item">
       <div>
-        <div class="fi-name">${escapeHtml(d.name)} <span style="font-size:13px;color:#475569;font-weight:500;">(${escapeHtml(d.dept)})</span></div>
-        <div class="fi-meta ${d.followup < today ? 'overdue' : ''}">${d.followup < today ? 'Overdue — was due' : 'Due'} ${fmtDate(d.followup)} · ${escapeHtml(d.mobile||'no number')}</div>
+        <div class="fi-name">${escapeHtml(d.name)} <span style="font-size:13px;color:#475569;font-weight:500;">(${escapeHtml(d.dept || '—')})</span></div>
+        <div class="fi-meta ${d.followup < today ? 'overdue' : ''}">${d.followup < today ? 'Overdue — was due' : 'Due'} ${escapeHtml(fmtDate(d.followup))} · ${escapeHtml(d.mobile || 'no number')}</div>
       </div>
-      <button class="btn small" onclick="switchToCallTab('${d.id}')">Follow up</button>
+      <button class="btn small" data-id="${escapeHtml(d.id)}" onclick="switchToCallTab(this.dataset.id)">Follow up</button>
     </div>
   `).join('') : `<div class="empty">Nothing due today. Nice.</div>`;
 
-  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
-  const tomStr = tomorrow.toISOString().slice(0,10);
-  const tomList = document.getElementById('tomorrowList');
-  const tomDoctors = doctors.filter(d => d.followup === tomStr);
-  const tomNotes = planNotes.filter(n => n.date === todayStr());
-  let html = '';
-  if(tomDoctors.length){
-    html += tomDoctors.map(d => `<div class="followup-item"><div class="fi-name">${escapeHtml(d.name)}</div><div class="fi-meta">${escapeHtml(d.dept)} · ${escapeHtml(d.mobile||'')}</div></div>`).join('');
-  }
-  if(tomNotes.length){
-    html += tomNotes.map(n => `<div class="followup-item"><div class="fi-name" style="font-size:14px;font-weight:600;">${escapeHtml(n.text)}</div><div class="fi-meta">added by ${escapeHtml(n.by)}</div></div>`).join('');
-  }
-  tomorrowList.innerHTML = html || `<div class="empty">No plan for tomorrow yet — add a note below, or set a follow-up date on a doctor.</div>`;
+  const todayNotes = db.plan.filter(n => n.forDate === today);
+  document.getElementById('todayNotes').innerHTML = todayNotes.length
+    ? `<div class="sub-head">Plan notes for today</div>` + todayNotes.map(planItemHtml).join('')
+    : '';
+
+  const tomDoctors = open.filter(d => d.followup === tomorrow);
+  const tomNotes = db.plan.filter(n => n.forDate === tomorrow);
+  const html =
+    tomDoctors.map(d => `<div class="followup-item"><div><div class="fi-name">${escapeHtml(d.name)}</div><div class="fi-meta">${escapeHtml(d.dept || '—')} · ${escapeHtml(d.mobile || 'no number')}</div></div></div>`).join('') +
+    tomNotes.map(planItemHtml).join('');
+  document.getElementById('tomorrowList').innerHTML = html || `<div class="empty">No plan for tomorrow yet — add a note below, or set a follow-up date on a doctor.</div>`;
 }
+
 function switchToCallTab(docId){
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.querySelector('[data-view="calls"]').classList.add('active');
-  document.getElementById('view-calls').classList.add('active');
-  renderCalls();
+  showView('calls');
   document.getElementById('c_doctor').value = docId;
+  document.getElementById('c_doctor').scrollIntoView({behavior:'smooth', block:'center'});
 }
-async function addPlanNote(){
+
+function addPlanNote(){
   const text = document.getElementById('planNote').value.trim();
-  if(!text) return;
-  if(!currentBD){ openBDModal(); return; }
-  planNotes.push({text, date: todayStr(), by: currentBD.name});
-  await savePlanNotes();
-  document.getElementById('planNote').value='';
+  if(!text){ showToast('Write a note first'); return; }
+  if(!requireBD()) return;
+  const note = {id: newId('p'), forDate: dayOffset(1), text, by: currentBD.name};
+  db.plan.push(note);
+  enqueue('addPlan', note);
+  document.getElementById('planNote').value = '';
   renderDashboard();
   showToast('Added to tomorrow\'s plan');
+}
+function deletePlanNote(id){
+  if(!requireBD()) return;
+  db.plan = db.plan.filter(n => n.id !== id);
+  enqueue('deletePlan', {id});
+  renderDashboard();
 }
 
 // ---------- call register ----------
 function renderCalls(){
   const sel = document.getElementById('c_doctor');
-  sel.innerHTML = doctors.map(d => `<option value="${d.id}">${escapeHtml(d.name)} — ${escapeHtml(d.dept)}</option>`).join('') || `<option>No doctors added yet</option>`;
+  const prev = sel.value;
+  const sorted = db.doctors.slice().sort((a,b) => (a.name||'').localeCompare(b.name||''));
+  sel.innerHTML = sorted.map(d => `<option value="${escapeHtml(d.id)}">${escapeHtml(d.name)} — ${escapeHtml(d.dept || '—')}${d.mobile ? ' · ' + escapeHtml(d.mobile) : ''}</option>`).join('')
+    || `<option value="">No doctors added yet</option>`;
+  if(prev && sorted.some(d => d.id === prev)) sel.value = prev;
 
-  const today = todayStr();
-  const todays = calls.filter(c => c.date === today);
-  document.getElementById('callListToday').innerHTML = todays.length ? todays.slice().reverse().map(callHtml).join('') : `<div class="empty">No calls logged today yet.</div>`;
-  document.getElementById('callListAll').innerHTML = calls.length ? calls.slice().reverse().slice(0,50).map(callHtml).join('') : `<div class="empty">No calls logged yet.</div>`;
+  const byNewest = db.calls.slice().sort((a,b) => (b.time || b.date || '').localeCompare(a.time || a.date || ''));
+  const todays = byNewest.filter(c => c.date === todayStr());
+  document.getElementById('callListToday').innerHTML = todays.length ? todays.map(callHtml).join('') : `<div class="empty">No calls logged today yet.</div>`;
+  document.getElementById('callListAll').innerHTML = byNewest.length ? byNewest.slice(0,50).map(callHtml).join('') : `<div class="empty">No calls logged yet.</div>`;
 }
 function callHtml(c){
   return `<div class="call-item">
-    <div class="call-top"><span>${c.date} · ${escapeHtml(c.by)}</span><span class="outcome-tag">${escapeHtml(c.outcome)}</span></div>
+    <div class="call-top"><span>${escapeHtml(fmtDate(c.date))} · ${escapeHtml(c.by || '—')}</span><span class="outcome-tag">${escapeHtml(c.outcome)}</span></div>
     <div class="call-doc">${escapeHtml(c.docName)}</div>
     ${c.notes ? `<div style="margin-top:3px;">${escapeHtml(c.notes)}</div>` : ''}
-    ${c.next ? `<div style="margin-top:3px;color:#475569;">Next action: ${fmtDate(c.next)}</div>` : ''}
+    ${c.next ? `<div style="margin-top:3px;color:#475569;">Next action: ${escapeHtml(fmtDate(c.next))}</div>` : ''}
   </div>`;
 }
-async function logCall(){
-  if(!currentBD){ openBDModal(); showToast('Please sign in first'); return; }
+
+// What a call outcome means for the doctor's status (null = leave as is).
+function statusAfterCall(outcome, current){
+  if(outcome === 'Onboarding completed') return 'Onboarded';
+  if(outcome === 'Connected — not interested') return 'Not Interested';
+  if(current === 'New' || !current) return 'Contacted';
+  return null;
+}
+
+function logCall(){
+  if(!requireBD()) return;
   const docId = document.getElementById('c_doctor').value;
-  const doc = doctors.find(d=>d.id===docId);
+  const doc = findDoctor(docId);
   if(!doc){ showToast('Add a doctor first'); return; }
+  const outcome = document.getElementById('c_outcome').value;
   const next = document.getElementById('c_next').value;
-  calls.push({
-    id: 'c'+Date.now(),
-    docId, docName: doc.name,
-    outcome: document.getElementById('c_outcome').value,
+  const call = {
+    id: newId('c'),
+    date: todayStr(),
+    time: new Date().toISOString(),
+    docId, docName: doc.name, dept: doc.dept,
+    outcome,
     notes: document.getElementById('c_notes').value.trim(),
     next,
-    date: todayStr(),
-    by: currentBD.name
+    by: currentBD.name, byEmail: currentBD.email, byPhone: currentBD.phone
+  };
+  const patch = {followup: next};
+  const status = statusAfterCall(outcome, doc.status);
+  if(status && status !== doc.status) patch.status = status;
+
+  db.calls.push(call);
+  Object.assign(doc, patch, {updatedBy: currentBD.name});
+  enqueue('logCall', {call, doctor: Object.assign({id: docId}, patch)});
+
+  document.getElementById('c_notes').value = '';
+  document.getElementById('c_next').value = '';
+  showToast(patch.status ? `Call logged · status → ${patch.status}` : 'Call logged');
+  renderAll();
+}
+
+// ---------- sheet log (Activity tab) ----------
+function renderSheetLog(){
+  const statusEl = document.getElementById('sheetLogStatus');
+  const listEl = document.getElementById('sheetLogList');
+  document.getElementById('openSheetLink').href = db.sheetUrl || FALLBACK_SHEET_URL;
+
+  if(!getApiUrl()){
+    statusEl.style.display = '';
+    statusEl.textContent = 'The sheet is not connected.';
+    listEl.innerHTML = '';
+    return;
+  }
+  if(!db.activity.length){
+    statusEl.style.display = '';
+    statusEl.textContent = 'No activity in the sheet yet.';
+    listEl.innerHTML = '';
+    return;
+  }
+  statusEl.style.display = 'none';
+  listEl.innerHTML = db.activity.map(a => {
+    const kind = /deleted|removed/i.test(a.action) ? ' del' : /call/i.test(a.action) ? ' call' : '';
+    return `<div class="act-item">
+      <div class="act-top"><span>${escapeHtml(a.timestamp)} · ${escapeHtml(a.by)}</span><span class="act-action${kind}">${escapeHtml(a.action)}</span></div>
+      ${a.details ? `<div class="act-details">${escapeHtml(a.details)}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ---------- about / pitch ----------
+function pitchSteps(p){ return (p.steps || '').split('\n').map(s => s.trim()).filter(Boolean); }
+
+function renderAbout(){
+  if(document.getElementById('aboutEdit').style.display !== 'none') return; // don't clobber an edit in progress
+  const p = db.pitch || {};
+  const setText = (id, value, placeholder) => {
+    const el = document.getElementById(id);
+    el.textContent = value || placeholder;
+    el.classList.toggle('placeholder-text', !value);
+  };
+  setText('ab_what_view', p.what, 'To be filled — one or two lines on what DigiDr\'s AI infrastructure for doctors actually is.');
+  setText('ab_why_view', p.why, 'To be filled — the benefits a doctor gets from this AI infrastructure.');
+  setText('ab_script_view', p.script, 'To be filled — the exact opening line to use on a cold call.');
+
+  const steps = pitchSteps(p);
+  document.getElementById('ab_steps_view').innerHTML = steps.length
+    ? '<ol class="steps">' + steps.map(s => `<li>${escapeHtml(s)}</li>`).join('') + '</ol>'
+    : '<p class="placeholder-text">To be filled — the onboarding steps, one per line.</p>';
+
+  document.getElementById('ab_time_view').textContent = '⏱ ' + (p.time || ABOUT_DEFAULT_TIME);
+  const meta = p.meta || {};
+  document.getElementById('ab_meta').textContent = meta.at ? `Last edited by ${meta.by || '—'} on ${meta.at}` : '';
+}
+function setAboutEditing(on){
+  document.getElementById('aboutEdit').style.display = on ? '' : 'none';
+  document.getElementById('aboutView').style.display = on ? 'none' : '';
+  document.getElementById('scriptView').style.display = on ? 'none' : '';
+  document.getElementById('aboutEditBtn').textContent = on ? 'Editing…' : 'Edit';
+}
+function toggleAboutEdit(){
+  const editing = document.getElementById('aboutEdit').style.display !== 'none';
+  if(editing){
+    setAboutEditing(false);
+    renderAbout();
+    return;
+  }
+  const p = db.pitch || {};
+  document.getElementById('ab_what').value = p.what || '';
+  document.getElementById('ab_why').value = p.why || '';
+  document.getElementById('ab_steps').value = pitchSteps(p).join('\n');
+  document.getElementById('ab_time').value = p.time || ABOUT_DEFAULT_TIME;
+  document.getElementById('ab_script').value = p.script || '';
+  setAboutEditing(true);
+}
+function saveAbout(){
+  if(!requireBD()) return;
+  const steps = document.getElementById('ab_steps').value.split('\n').map(s => s.trim()).filter(Boolean);
+  const content = {
+    what: document.getElementById('ab_what').value.trim(),
+    why: document.getElementById('ab_why').value.trim(),
+    steps,
+    time: document.getElementById('ab_time').value.trim() || ABOUT_DEFAULT_TIME,
+    script: document.getElementById('ab_script').value.trim()
+  };
+  db.pitch = Object.assign({}, content, {
+    steps: steps.join('\n'),
+    meta: {by: currentBD.name, at: 'just now'}
   });
-  if(next){ doc.followup = next; await saveDoctors(); }
-  await saveCalls();
-  submitToSheet({
-    docName: doc.name, dept: doc.dept,
-    bdName: currentBD.name, bdEmail: currentBD.email, bdPhone: currentBD.phone,
-    callOutcome: document.getElementById('c_outcome').value,
-    callNotes: document.getElementById('c_notes').value.trim(),
-    callNext: next
-  });
-  document.getElementById('c_notes').value='';
-  document.getElementById('c_next').value='';
-  showToast('Call logged');
-  renderCalls();
-  renderDashboard();
+  enqueue('savePitch', content);
+  setAboutEditing(false);
+  renderAbout();
+  showToast('Saved');
 }
 
 // ---------- init ----------
-(async function init(){
-  docMobileIti = setupPhoneInput(document.getElementById('f_mobile'));
-  document.getElementById('f_email').addEventListener('blur', function(){ validateEmail(this, false); });
-  document.getElementById('bd_email').addEventListener('blur', function(){ validateEmail(this, false); });
+(function init(){
+  document.querySelectorAll('.dept-select').forEach(s => fillSelect(s, DEPTS, DEPTS[0]));
+  document.querySelectorAll('.status-select').forEach(s => fillSelect(s, STATUSES, STATUSES[0]));
+  document.getElementById('filterStatus').innerHTML += STATUSES.map(s => `<option>${escapeHtml(s)}</option>`).join('');
 
-  await loadAll();
+  docMobileIti = setupPhoneInput(document.getElementById('f_mobile'));
+  ['f_email','bd_email','e_email'].forEach(id =>
+    document.getElementById(id).addEventListener('blur', function(){ validateEmail(this, false); }));
+
+  // Show the last copy instantly, then load fresh data from the sheet.
+  db = Object.assign(db, lsGet('cache', {}));
+  outbox = lsGet('outbox', []);
+  currentBD = lsGet('currentBD', null);
+
   renderBDStrip();
-  renderDashboard();
-  renderDoctors();
-  renderCalls();
-  renderAbout();
+  renderAll();
   if(!currentBD) openBDModal();
+  refreshFromSheet(true);
+
+  // Keep everyone's screens current, and retry unsaved changes.
+  setInterval(() => { if(document.visibilityState === 'visible') refreshFromSheet(true); }, 60000);
+  window.addEventListener('online', () => refreshFromSheet(true));
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') refreshFromSheet(true); });
 })();
 </script>
 
