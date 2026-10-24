@@ -725,7 +725,6 @@
     <div class="page-head">
       <h3 class="big">Sheet activity log</h3>
       <div class="page-actions">
-        <a class="btn small ghost" id="openSheetLink" href="#" target="_blank" rel="noopener" style="text-decoration:none;">Open Google Sheet</a>
         <button class="btn small ghost" onclick="refreshFromSheet()">Refresh</button>
       </div>
     </div>
@@ -741,11 +740,8 @@
     <h2 class="section-title"><i class="fa-solid fa-circle-info"></i> FOR THE PITCH</h2>
     <div class="page-head">
       <h3 class="big">What is DigiDr, and how do you explain it?</h3>
-      <div id="aboutEditControls">
-        <button class="btn small" id="aboutEditBtn" onclick="toggleAboutEdit()">Edit</button>
-      </div>
     </div>
-    <p class="page-sub">Anyone on the team can edit this. It's saved to the sheet's Pitch tab, so everyone sees the same version.</p>
+    <p class="page-sub">The shared pitch, the same for everyone on the team.</p>
 
     <div class="card about-block" id="aboutView">
       <h4>What is DigiDr</h4>
@@ -1225,7 +1221,7 @@ function saveDoctor(){
   const dup = db.doctors.find(d =>
     (mobile && digits(d.mobile) && digits(d.mobile) === digits(mobile)) ||
     (email && d.email && d.email.toLowerCase() === email.toLowerCase()));
-  if(dup && !confirm(`${dup.name} has the same phone/email and was already added by ${dup.addedBy || 'someone'}. Add anyway?`)) return;
+  if(dup){ showToast(`${dup.name} already exists (added by ${dup.addedBy || 'someone'}) — not added again`); return; }
 
   const doc = {
     id: newId('d'),
@@ -1565,7 +1561,6 @@ function logCall(){
 function renderSheetLog(){
   const statusEl = document.getElementById('sheetLogStatus');
   const listEl = document.getElementById('sheetLogList');
-  document.getElementById('openSheetLink').href = db.sheetUrl || FALLBACK_SHEET_URL;
 
   if(!getApiUrl()){
     statusEl.style.display = '';
@@ -1617,7 +1612,6 @@ function setAboutEditing(on){
   document.getElementById('aboutEdit').style.display = on ? '' : 'none';
   document.getElementById('aboutView').style.display = on ? 'none' : '';
   document.getElementById('scriptView').style.display = on ? 'none' : '';
-  document.getElementById('aboutEditBtn').textContent = on ? 'Editing…' : 'Edit';
 }
 function toggleAboutEdit(){
   const editing = document.getElementById('aboutEdit').style.display !== 'none';

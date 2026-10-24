@@ -105,7 +105,18 @@ function saveDoctor_(d, by) {
   const sh = getSheet_('Doctors');
   // An edit (a patch without "addedBy") for a doctor someone deleted meanwhile
   // must not bring back a half-empty row. Only a full "add" payload creates a row.
-  if (!findRow_(sh, d.id) && !d.addedBy) return null;
+  const exists = findRow_(sh, d.id);
+  if (!exists && !d.addedBy) return null;
+  if (!exists) {
+    // Checked against the sheet itself, so a doctor a teammate just added is caught too.
+    const digits = s => String(s || '').replace(/\D/g, '');
+    const mobile = digits(d.mobile);
+    const email = String(d.email || '').trim().toLowerCase();
+    const dup = readRows_('Doctors').find(r =>
+      (mobile && digits(r.mobile) === mobile) ||
+      (email && String(r.email || '').trim().toLowerCase() === email));
+    if (dup) throw new Error(dup.name + ' already exists in the sheet (same phone/email), so it was not added again');
+  }
   d.updatedBy = by;
   d.updatedAt = nowStr_();
   const res = upsert_('Doctors', d);
