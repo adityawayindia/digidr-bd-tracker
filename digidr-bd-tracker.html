@@ -663,7 +663,7 @@
       <h3 class="big">Doctor list</h3>
       <button class="btn small ghost" onclick="refreshFromSheet()">Refresh</button>
     </div>
-    <p class="page-sub">Every doctor in the shared sheet, added by anyone on the team. Changes here are saved to the sheet.</p>
+    <p class="page-sub">The doctors you added. Changes here are saved to the sheet.</p>
     <div class="filters">
       <input id="searchDoc" placeholder="Search by name, department, phone, email or BD..." oninput="renderDoctors()">
       <select id="filterStatus" onchange="renderDoctors()">
@@ -728,7 +728,7 @@
         <button class="btn small ghost" onclick="refreshFromSheet()">Refresh</button>
       </div>
     </div>
-    <p class="page-sub">Every change saved to the sheet by anyone on the team, newest first. Read from the sheet's Activity tab.</p>
+    <p class="page-sub">Your changes saved to the sheet, newest first. Read from the sheet's Activity tab.</p>
     <div class="card">
       <div id="sheetLogStatus" class="empty">Loading...</div>
       <div id="sheetLogList"></div>
@@ -1195,8 +1195,21 @@ function saveBD(){
   lsSet('currentBD', currentBD);
   closeModal('bdModal');
   renderBDStrip();
+  renderAll();
   showToast('Signed in as ' + name);
 }
+// The tracker only shows the signed-in BD's own doctors, calls, plan notes and activity.
+// Matched by email when both sides have one, otherwise by name.
+function isMine(name, email){
+  if(!currentBD) return false;
+  const e = (email || '').trim().toLowerCase(), me = (currentBD.email || '').trim().toLowerCase();
+  if(e && me) return e === me;
+  return (name || '').trim().toLowerCase() === (currentBD.name || '').trim().toLowerCase();
+}
+function myDoctors(){ return db.doctors.filter(d => isMine(d.addedBy, d.addedByEmail)); }
+function myCalls(){ return db.calls.filter(c => isMine(c.by, c.byEmail)); }
+function myPlan(){ return db.plan.filter(n => isMine(n.by)); }
+function myActivity(){ return db.activity.filter(a => isMine(a.by)); }
 function requireBD(){
   if(currentBD) return true;
   openBDModal();
@@ -1320,7 +1333,7 @@ function saveEdit(){
 // ---------- doctor list ----------
 function lastCallFor(docId){
   let last = null, count = 0;
-  db.calls.forEach(c => {
+  myCalls().forEach(c => {
     if(c.docId !== docId) return;
     count++;
     if(!last || (c.time || c.date) > (last.time || last.date)) last = c;
@@ -1362,16 +1375,21 @@ function renderDoctors(){
   const q = (document.getElementById('searchDoc').value || '').toLowerCase().trim();
   const statusFilter = document.getElementById('filterStatus').value;
 
-  const filtered = db.doctors.filter(d => {
+  const mine = myDoctors();
+  const filtered = mine.filter(d => {
     if(statusFilter && (d.status || 'New') !== statusFilter) return false;
     if(!q) return true;
     return [d.name, d.dept, d.mobile, d.email, d.addedBy].some(v => (v||'').toLowerCase().includes(q));
   });
   visibleDocIds = filtered.map(d => d.id);
-  document.getElementById('doctorCount').textContent = db.doctors.length
-    ? (filtered.length === db.doctors.length ? `${filtered.length} doctor${filtered.length===1?'':'s'}` : `${filtered.length} of ${db.doctors.length} doctors`)
+  document.getElementById('doctorCount').textContent = mine.length
+    ? (filtered.length === mine.length ? `${filtered.length} doctor${filtered.length===1?'':'s'}` : `${filtered.length} of ${mine.length} doctors`)
     : '';
-  if(!db.doctors.length){
+  if(!currentBD){
+    list.innerHTML = `<div class="empty">Sign in to see your doctors.</div>`;
+    return;
+  }
+  if(!mine.length){
     list.innerHTML = `<div class="empty">No doctors yet. Add your first lead from the "Add Doctor" tab.</div>`;
     return;
   }
@@ -1441,10 +1459,11 @@ function renderDashboard(){
   const today = todayStr();
   const tomorrow = dayOffset(1);
   document.getElementById('dashDate').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long', day:'numeric', month:'long', year:'numeric'});
-  document.getElementById('statTotal').textContent = db.doctors.length;
-  document.getElementById('statOnboarded').textContent = db.doctors.filter(d => d.status === 'Onboarded').length;
+  const mine = myDoctors(), notes = myPlan();
+  document.getElementById('statTotal').textContent = mine.length;
+  document.getElementById('statOnboarded').textContent = mine.filter(d => d.status === 'Onboarded').length;
 
-  const open = db.doctors.filter(d => !CLOSED_STATUSES.includes(d.status));
+  const open = mine.filter(d => !CLOSED_STATUSES.includes(d.status));
   const due = open.filter(d => d.followup && d.followup <= today).sort((a,b) => a.followup.localeCompare(b.followup));
   document.getElementById('statDue').textContent = due.length;
 
@@ -1458,13 +1477,13 @@ function renderDashboard(){
     </div>
   `).join('') : `<div class="empty">Nothing due today. Nice.</div>`;
 
-  const todayNotes = db.plan.filter(n => n.forDate === today);
+  const todayNotes = notes.filter(n => n.forDate === today);
   document.getElementById('todayNotes').innerHTML = todayNotes.length
     ? `<div class="sub-head">Plan notes for today</div>` + todayNotes.map(planItemHtml).join('')
     : '';
 
   const tomDoctors = open.filter(d => d.followup === tomorrow);
-  const tomNotes = db.plan.filter(n => n.forDate === tomorrow);
+  const tomNotes = notes.filter(n => n.forDate === tomorrow);
   const html =
     tomDoctors.map(d => `<div class="followup-item"><div><div class="fi-name">${escapeHtml(d.name)}</div><div class="fi-meta">${escapeHtml(d.dept || '—')} · ${escapeHtml(d.mobile || 'no number')}</div></div></div>`).join('') +
     tomNotes.map(planItemHtml).join('');
@@ -1499,12 +1518,12 @@ function deletePlanNote(id){
 function renderCalls(){
   const sel = document.getElementById('c_doctor');
   const prev = sel.value;
-  const sorted = db.doctors.slice().sort((a,b) => (a.name||'').localeCompare(b.name||''));
+  const sorted = myDoctors().sort((a,b) => (a.name||'').localeCompare(b.name||''));
   sel.innerHTML = sorted.map(d => `<option value="${escapeHtml(d.id)}">${escapeHtml(d.name)} — ${escapeHtml(d.dept || '—')}${d.mobile ? ' · ' + escapeHtml(d.mobile) : ''}</option>`).join('')
     || `<option value="">No doctors added yet</option>`;
   if(prev && sorted.some(d => d.id === prev)) sel.value = prev;
 
-  const byNewest = db.calls.slice().sort((a,b) => (b.time || b.date || '').localeCompare(a.time || a.date || ''));
+  const byNewest = myCalls().sort((a,b) => (b.time || b.date || '').localeCompare(a.time || a.date || ''));
   const todays = byNewest.filter(c => c.date === todayStr());
   document.getElementById('callListToday').innerHTML = todays.length ? todays.map(callHtml).join('') : `<div class="empty">No calls logged today yet.</div>`;
   document.getElementById('callListAll').innerHTML = byNewest.length ? byNewest.slice(0,50).map(callHtml).join('') : `<div class="empty">No calls logged yet.</div>`;
@@ -1568,14 +1587,15 @@ function renderSheetLog(){
     listEl.innerHTML = '';
     return;
   }
-  if(!db.activity.length){
+  const acts = myActivity();
+  if(!acts.length){
     statusEl.style.display = '';
-    statusEl.textContent = 'No activity in the sheet yet.';
+    statusEl.textContent = currentBD ? 'No activity from you in the sheet yet.' : 'Sign in to see your activity.';
     listEl.innerHTML = '';
     return;
   }
   statusEl.style.display = 'none';
-  listEl.innerHTML = db.activity.map(a => {
+  listEl.innerHTML = acts.map(a => {
     const kind = /deleted|removed/i.test(a.action) ? ' del' : /call/i.test(a.action) ? ' call' : '';
     return `<div class="act-item">
       <div class="act-top"><span>${escapeHtml(a.timestamp)} · ${escapeHtml(a.by)}</span><span class="act-action${kind}">${escapeHtml(a.action)}</span></div>
