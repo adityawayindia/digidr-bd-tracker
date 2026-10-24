@@ -50,6 +50,12 @@
     border-bottom:1px solid rgba(203,213,225,0.6);
     padding:18px 24px 16px;
   }
+  header.app .logo{
+    display:block;
+    height:48px;
+    width:auto;
+    margin:0 auto 8px;
+  }
   header.app h1{
     font-size:22px;
     font-weight:700;
@@ -156,6 +162,14 @@
     transition:all 0.2s ease;
   }
   .bd-strip button:hover{border-color:#0E65D7;background:#EFF6FF;}
+  .bd-strip .strip-info{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1 1 280px;}
+  .bd-strip .who{min-width:0;overflow-wrap:anywhere;}
+  @media (max-width:700px){
+    .bd-strip{padding:12px 14px;gap:10px;}
+    .bd-strip .strip-info{flex:1 1 100%;}
+    .bd-strip .strip-actions{margin-left:0;flex:1 1 100%;}
+    .bd-strip .strip-actions button{flex:1 1 0;}
+  }
 
   .card{
     background:rgba(255,255,255,0.92);
@@ -562,7 +576,8 @@
 <div class="hero-aurora" aria-hidden="true"></div>
 
 <header class="app">
-  <h1>DigiDr — Business Development Tracker</h1>
+  <img class="logo" src="https://storage.googleapis.com/digidr/logo.png" alt="DigiDr">
+  <h1>Business Development Tracker</h1>
   <p>Doctor onboarding, follow-ups &amp; daily call register</p>
 </header>
 
@@ -578,8 +593,10 @@
 <main>
 
   <div class="bd-strip">
-    <div class="who" id="bdWho">No BD signed in</div>
-    <div class="sync" id="syncStatus"><span class="dot"></span><span id="syncText">Not connected</span></div>
+    <div class="strip-info">
+      <div class="who" id="bdWho">No BD signed in</div>
+      <div class="sync" id="syncStatus"><span class="dot"></span><span id="syncText">Not connected</span></div>
+    </div>
     <div class="strip-actions">
       <button onclick="refreshFromSheet()" title="Reload everything from the Google Sheet"><i class="fa-solid fa-rotate"></i> Sync</button>
       <button id="bdBtn" onclick="openBDModal()">Sign in</button>
