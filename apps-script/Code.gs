@@ -7,6 +7,9 @@
  *   Plan      notes for a given day's plan
  *   Pitch     key/value content for the "About DigiDr" screen
  *   Activity  append-only audit log of every change (shown in "Sheet Log")
+ *   Users     who may sign in: email, name, phone, active (Y/N), password (plain text,
+ *             visible to the sheet admin). Change the password cell to reset it.
+ *   Sessions  sign-in tokens (managed by the script, don't edit)
  *
  * See README.md in this folder for deployment steps.
  */
@@ -22,8 +25,15 @@ const SCHEMA = {
              'by', 'byEmail', 'byPhone'],
   Plan:     ['id', 'forDate', 'text', 'by', 'createdAt'],
   Pitch:    ['key', 'value', 'updatedBy', 'updatedAt'],
-  Activity: ['timestamp', 'by', 'action', 'details']
+  Activity: ['timestamp', 'by', 'action', 'details'],
+  Users:    ['email', 'name', 'phone', 'active', 'password'],
+  Sessions: ['token', 'email', 'expires']
 };
+const MIN_PASSWORD = 6;
+const SESSION_DAYS = 7;
+const MAX_FAILS = 5;          // wrong passwords before the email is locked...
+const LOCK_SECONDS = 15 * 60; // ...for this long
+
 const PITCH_KEYS = ['what', 'why', 'steps', 'time', 'script'];
 const AUDIT_FIELDS = ['updatedBy', 'updatedAt'];
 
@@ -48,6 +58,14 @@ function doPost(e) {
   }
   if (TEAM_KEY && req.key !== TEAM_KEY) return json_({ ok: false, error: 'Invalid team key' });
 
+  // Every action except login needs a valid session. The user is taken from the
+  // session, never from what the browser says.
+  let user = null;
+  if (req.action !== 'login') {
+    user = sessionUser_(req.token);
+    if (!user) return json_({ ok: false, auth: true, error: 'Please sign in again' });
+  }
+
   const isRead = req.action === 'getAll';
   const lock = LockService.getScriptLock();
   let locked = false;
@@ -62,7 +80,9 @@ function doPost(e) {
     }
   }
   try {
-    return json_({ ok: true, result: handle_(req.action, req.data || {}, req.by || '') });
+    if (req.action === 'login') return json_(login_(req.data || {}));
+    if (req.action === 'logout') return json_({ ok: true, result: logout_(req.token) });
+    return json_({ ok: true, result: handle_(req.action, req.data || {}, user) });
   } catch (err) {
     return json_({ ok: false, error: String(err && err.message || err) });
   } finally {
@@ -70,44 +90,130 @@ function doPost(e) {
   }
 }
 
-function handle_(action, data, by) {
+function handle_(action, data, user) {
+  const by = user.name;
   switch (action) {
-    case 'getAll':       return getAll_();
-    case 'saveDoctor':   return saveDoctor_(data, by);
-    case 'deleteDoctor': return deleteDoctor_(data, by);
-    case 'logCall':      return logCall_(data, by);
-    case 'addPlan':      return addPlan_(data, by);
-    case 'deletePlan':   return deletePlan_(data, by);
+    case 'getAll':       return getAll_(user);
+    case 'saveDoctor':   return saveDoctor_(data, user);
+    case 'deleteDoctor': return deleteDoctor_(data, user);
+    case 'logCall':      return logCall_(data, user);
+    case 'addPlan':      return addPlan_(data, user);
+    case 'deletePlan':   return deletePlan_(data, user);
     case 'savePitch':    return savePitch_(data, by);
     default: throw new Error('Unknown action: ' + action);
   }
 }
 
+// ---------- authentication ----------
+function login_(d) {
+  const email = String(d.email || '').trim().toLowerCase();
+  const password = String(d.password || '');
+  const fail = { ok: false, error: 'Wrong email or password' };
+  if (!email || !password) return fail;
+
+  const cache = CacheService.getScriptCache();
+  const failKey = 'fail_' + email;
+  const fails = Number(cache.get(failKey) || 0);
+  if (fails >= MAX_FAILS) {
+    return { ok: false, error: 'Too many wrong attempts. Try again in 15 minutes.' };
+  }
+
+  const u = findUser_(email);
+  if (!u || !String(u.password).trim() || String(u.password).trim() !== password.trim()) {
+    cache.put(failKey, String(fails + 1), LOCK_SECONDS);
+    return fail;
+  }
+  if (!isActive_(u)) return { ok: false, error: 'Your access has been turned off. Contact your admin.' };
+  cache.remove(failKey);
+
+  purgeSessions_();
+  const token = Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '');
+  const expires = new Date(Date.now() + SESSION_DAYS * 86400000).toISOString();
+  upsert_('Sessions', { token: token, email: email, expires: expires });
+  log_(u.name, 'Signed in', email);
+  return { ok: true, result: { token: token, user: publicUser_(u) } };
+}
+
+function logout_(token) {
+  if (!token) return false;
+  const sh = getSheet_('Sessions');
+  const idx = findRow_(sh, token);
+  if (idx) sh.deleteRow(idx);
+  return true;
+}
+
+// The signed-in user for a token, or null if the token is unknown or expired,
+// or the user has been deactivated.
+function sessionUser_(token) {
+  if (!token) return null;
+  const s = readRows_('Sessions').find(r => r.token === String(token));
+  if (!s || new Date(s.expires) < new Date()) return null;
+  const u = findUser_(s.email);
+  return u && isActive_(u) ? publicUser_(u) : null;
+}
+
+function findUser_(email) {
+  email = String(email || '').trim().toLowerCase();
+  return readRows_('Users').find(u => String(u.email).trim().toLowerCase() === email) || null;
+}
+
+function isActive_(u) {
+  return /^(y|yes|true|1)$/i.test(String(u.active).trim());
+}
+
+function publicUser_(u) {
+  return { email: String(u.email).trim().toLowerCase(), name: u.name, phone: u.phone };
+}
+
+function purgeSessions_() {
+  const sh = getSheet_('Sessions');
+  const last = sh.getLastRow();
+  if (last < 2) return;
+  const now = new Date();
+  const rows = sh.getRange(2, 1, last - 1, 3).getValues();
+  for (let i = rows.length - 1; i >= 0; i--) {
+    if (!rows[i][0] || new Date(rows[i][2]) < now) sh.deleteRow(i + 2);
+  }
+}
+
+// A record belongs to a user when its email matches, or (for rows with no email) its name.
+function owns_(user, name, email) {
+  const e = String(email || '').trim().toLowerCase();
+  if (e) return e === user.email;
+  return String(name || '').trim().toLowerCase() === String(user.name || '').trim().toLowerCase();
+}
+
 // ---------- actions ----------
-function getAll_() {
+function getAll_(user) {
   const pitch = { meta: { by: '', at: '' } };
   readRows_('Pitch').forEach(r => {
     pitch[r.key] = r.value;
     if (r.updatedAt > pitch.meta.at) pitch.meta = { by: r.updatedBy, at: r.updatedAt };
   });
   return {
-    doctors: readRows_('Doctors'),
-    calls: readRows_('Calls'),
-    plan: readRows_('Plan'),
+    doctors: readRows_('Doctors').filter(d => owns_(user, d.addedBy, d.addedByEmail)),
+    calls: readRows_('Calls').filter(c => owns_(user, c.by, c.byEmail)),
+    plan: readRows_('Plan').filter(p => owns_(user, p.by)),
     pitch: pitch,
-    activity: readRows_('Activity').slice(-300).reverse(),
-    sheetUrl: SpreadsheetApp.getActive().getUrl()
+    activity: readRows_('Activity').filter(a => owns_(user, a.by)).slice(-300).reverse()
   };
 }
 
-function saveDoctor_(d, by) {
+function saveDoctor_(d, user) {
+  const by = user.name;
   if (!d.id) throw new Error('Doctor id missing');
   const sh = getSheet_('Doctors');
   // An edit (a patch without "addedBy") for a doctor someone deleted meanwhile
   // must not bring back a half-empty row. Only a full "add" payload creates a row.
   const exists = findRow_(sh, d.id);
   if (!exists && !d.addedBy) return null;
-  if (!exists) {
+  if (exists) {
+    assertOwnsDoctor_(user, sh, exists);
+    delete d.addedBy;
+    delete d.addedByEmail;
+  } else {
+    d.addedBy = user.name;
+    d.addedByEmail = user.email;
     // Checked against the sheet itself, so a doctor a teammate just added is caught too.
     const digits = s => String(s || '').replace(/\D/g, '');
     const mobile = digits(d.mobile);
@@ -128,22 +234,43 @@ function saveDoctor_(d, by) {
   return res.row;
 }
 
-function deleteDoctor_(d, by) {
+function assertOwnsDoctor_(user, sh, idx) {
+  const h = SCHEMA.Doctors;
+  const r = sh.getRange(idx, 1, 1, h.length).getValues()[0];
+  if (!owns_(user, cell_(r[h.indexOf('addedBy')]), cell_(r[h.indexOf('addedByEmail')]))) {
+    throw new Error('This doctor belongs to another BD');
+  }
+}
+
+function deleteDoctor_(d, user) {
+  const by = user.name;
   const sh = getSheet_('Doctors');
   const idx = findRow_(sh, d.id);
   if (!idx) return false;
+  assertOwnsDoctor_(user, sh, idx);
   const name = sh.getRange(idx, SCHEMA.Doctors.indexOf('name') + 1).getValue();
   sh.deleteRow(idx);
   log_(by, 'Doctor deleted', String(name));
   return true;
 }
 
-function logCall_(data, by) {
+function logCall_(data, user) {
+  const by = user.name;
   const c = data.call;
   if (!c || !c.id) throw new Error('Call id missing');
-  const res = upsert_('Calls', c);
   const doc = data.doctor;
-  if (doc && doc.id && findRow_(getSheet_('Doctors'), doc.id)) {
+  const docSh = getSheet_('Doctors');
+  const docIdx = doc && doc.id ? findRow_(docSh, doc.id) : 0;
+  if (docIdx) assertOwnsDoctor_(user, docSh, docIdx);
+  const old = readRows_('Calls').find(r => r.id === String(c.id));
+  if (old && !owns_(user, old.by, old.byEmail)) throw new Error('This call belongs to another BD');
+  c.by = user.name;
+  c.byEmail = user.email;
+  c.byPhone = user.phone;
+  const res = upsert_('Calls', c);
+  if (docIdx) {
+    delete doc.addedBy;
+    delete doc.addedByEmail;
     doc.updatedBy = by;
     doc.updatedAt = nowStr_();
     upsert_('Doctors', doc);
@@ -154,18 +281,25 @@ function logCall_(data, by) {
   return true;
 }
 
-function addPlan_(p, by) {
+function addPlan_(p, user) {
+  const by = user.name;
   if (!p.id) throw new Error('Plan id missing');
+  const old = readRows_('Plan').find(r => r.id === String(p.id));
+  if (old && !owns_(user, old.by)) throw new Error('This note belongs to another BD');
+  p.by = by;
   p.createdAt = p.createdAt || nowStr_();
   const res = upsert_('Plan', p);
   if (res.created) log_(by, 'Plan note added', 'For ' + p.forDate + ': ' + p.text);
   return true;
 }
 
-function deletePlan_(p, by) {
+function deletePlan_(p, user) {
+  const by = user.name;
   const sh = getSheet_('Plan');
   const idx = findRow_(sh, p.id);
   if (!idx) return false;
+  const owner = sh.getRange(idx, SCHEMA.Plan.indexOf('by') + 1).getValue();
+  if (!owns_(user, cell_(owner))) throw new Error('This note belongs to another BD');
   const text = sh.getRange(idx, SCHEMA.Plan.indexOf('text') + 1).getValue();
   sh.deleteRow(idx);
   log_(by, 'Plan note removed', String(text));

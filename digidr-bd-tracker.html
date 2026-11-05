@@ -254,6 +254,10 @@
 
   /* intl-tel-input */
   .iti{width:100%;}
+  /* the global input padding overrides the library's offset for the dial code, so they overlap */
+  .iti--separate-dial-code input.iti__tel-input,
+  .iti--separate-dial-code input[type=tel]{padding-left:100px !important;}
+  @media (max-width:600px){ .iti__country-list{width:min(320px, calc(100vw - 72px));white-space:normal;} }
   .iti__country-list{
     border-radius:12px;
     box-shadow:0 10px 25px rgba(0,0,0,0.15);
@@ -449,6 +453,8 @@
     margin-bottom:6px;
   }
   .about-block p{margin-bottom:10px;line-height:1.6;font-size:16px;color:#334155;}
+  .about-list{margin:0 0 14px 20px;padding:0;color:#334155;font-size:15.5px;line-height:1.6;}
+  .about-list li{margin-bottom:5px;}
   .steps{counter-reset:step;list-style:none;padding:0;margin:0;}
   .steps li{
     counter-increment:step;
@@ -546,6 +552,34 @@
     padding:20px;
   }
   .modal-bg.active{display:flex;}
+
+  /* Sign-in is a full page, not a popup: the app is hidden until signed in. */
+  body.signed-out > :not(#bdModal):not(.toast){display:none !important;}
+  #bdModal{
+    z-index:100;
+    background:#fff;
+    backdrop-filter:none;
+    flex-direction:column;
+    overflow-y:auto;
+  }
+  #bdModal .login-aurora{
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:linear-gradient(115deg,
+      rgba(3,96,217,0.22) 0%,
+      rgba(237,147,12,0.22) 35%,
+      rgba(3,96,217,0.22) 70%,
+      rgba(237,147,12,0.22) 100%);
+    background-size:320% 320%;
+    animation:hero-aurora-gradient 12s ease-in-out infinite;
+  }
+  #bdModal .login-logo{position:relative;z-index:1;height:64px;width:auto;margin-bottom:8px;}
+  #bdModal .login-title{position:relative;z-index:1;font-size:22px;font-weight:700;color:#0C3B5E;text-align:center;margin-bottom:2px;}
+  #bdModal .login-sub{position:relative;z-index:1;font-size:14px;color:#475569;text-align:center;margin-bottom:48px;}
+  #bdModal .modal{position:relative;z-index:1;max-height:none;overflow:visible;flex-shrink:0;}
+  /* Auto margins centre the page but still let it scroll from the top on short screens. */
+  #bdModal{justify-content:flex-start;}
+  #bdModal .login-logo{margin-top:auto;flex-shrink:0;}
+  #bdModal .modal{margin-bottom:auto;}
   .modal{
     background:#fff;
     border-radius:20px;
@@ -575,12 +609,23 @@
     font-size:14px;
     font-weight:600;
     display:none;
-    z-index:60;
+    z-index:200;
     box-shadow:0 10px 30px rgba(0,0,0,0.25);
   }
+  .ecg-loader{display:inline-flex;align-items:center;gap:8px;vertical-align:middle;}
+  .ecg-loader svg{width:34px;height:16px;overflow:visible;}
+  .ecg-loader path{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+    stroke-dasharray:60;stroke-dashoffset:60;animation:ecgDraw 1.1s linear infinite;
+    filter:drop-shadow(0 0 3px currentColor);}
+  @keyframes ecgDraw{
+    0%{stroke-dashoffset:60;opacity:1}
+    70%{stroke-dashoffset:0;opacity:1}
+    100%{stroke-dashoffset:0;opacity:0}
+  }
+  @media (prefers-reduced-motion:reduce){.ecg-loader path{animation:none;stroke-dashoffset:0}}
 </style>
 </head>
-<body>
+<body class="signed-out">
 
 <div class="hero-aurora" aria-hidden="true"></div>
 
@@ -608,7 +653,7 @@
     </div>
     <div class="strip-actions">
       <button onclick="refreshFromSheet()" title="Reload everything from the Google Sheet"><i class="fa-solid fa-rotate"></i> Sync</button>
-      <button id="bdBtn" onclick="openBDModal()">Sign in</button>
+      <button id="bdBtn" onclick="bdButton()">Sign in</button>
     </div>
   </div>
 
@@ -663,7 +708,8 @@
       <div class="row3">
         <div>
           <label>Department / Speciality</label>
-          <select id="f_dept" class="dept-select"></select>
+          <select id="f_dept" class="dept-select" onchange="toggleDeptOther('f')"></select>
+          <input id="f_dept_other" type="text" placeholder="Enter speciality" style="display:none;margin-top:8px;">
         </div>
         <div>
           <label>Onboarding status</label>
@@ -776,6 +822,41 @@
       <h4>Why a doctor should care</h4>
       <p id="ab_why_view" class="placeholder-text"></p>
 
+      <h4>The central message</h4>
+      <p><strong>Patients are online. Your digital presence should be too.</strong><br>
+      DigiDr: your complete AI-powered digital presence and patient engagement ecosystem — helping a doctor <em>be visible, be accessible, stay connected.</em></p>
+
+      <h4>Value to doctors and clinics</h4>
+      <ul class="about-list">
+        <li><strong>Be discoverable:</strong> a consistent digital presence across online channels.</li>
+        <li><strong>Be accessible:</strong> makes it easier for patients to find and connect with the doctor.</li>
+        <li><strong>Stay engaged:</strong> responds to patient queries and maintains ongoing communication through AI.</li>
+        <li><strong>Be organised:</strong> simplifies online and offline appointments, feedback and diagnostic referral tracking.</li>
+        <li><strong>Stay informed:</strong> relevant daily medical trends and updates.</li>
+        <li><strong>Grow intelligently:</strong> understand digital engagement and practice growth through analytics.</li>
+        <li><strong>Gain insights</strong> into website visitors, email and blog readership, and social media interactions.</li>
+      </ul>
+
+      <h4>Your digital assets. Your ownership. Your control.</h4>
+      <p>Unlike platforms that give a doctor a profile or listing inside their own ecosystem — where the doctor stays on rent — DigiDr builds the doctor's independent digital infrastructure.</p>
+      <ul class="about-list">
+        <li>Every digital asset — websites, microsites and social media handles — belongs to the doctor.</li>
+        <li>The doctor retains ownership and control of their digital identity and audience.</li>
+        <li>Every communication, content update and digital activity runs under the doctor's approval and governance.</li>
+        <li>The presence is a long-term asset, not a rented listing on someone else's platform.</li>
+      </ul>
+
+      <h4>Does DigiDr follow NMC guidelines?</h4>
+      <p>DigiDr is designed with NMC-aligned safeguards, verification systems and doctor-controlled approval workflows to support responsible healthcare communication.</p>
+      <ul class="about-list">
+        <li><strong>Relevant medical content:</strong> disease awareness, health education and research-based information relevant to the doctor's speciality.</li>
+        <li><strong>Doctor-approved publishing:</strong> all content is published only after the doctor reviews and approves it.</li>
+        <li><strong>Patient education:</strong> content is simplified to help patients understand diseases, conditions and available healthcare information.</li>
+        <li><strong>Built-in guardrails:</strong> verification mechanisms and content safeguards support responsible medical communication.</li>
+        <li><strong>No appointment solicitation:</strong> DigiDr does not use medical content to solicit or induce patients to book appointments.</li>
+      </ul>
+      <p>DigiDr empowers doctors to educate and inform patients responsibly while retaining complete control over their digital communication.</p>
+
       <h4>How onboarding works</h4>
       <div id="ab_steps_view"></div>
 
@@ -815,20 +896,28 @@
 <div class="toast" id="toast"></div>
 
 <!-- BD login modal -->
-<div class="modal-bg" id="bdModal">
-  <div class="modal">
-    <h3>Who's using this?</h3>
-    <p>Enter your details so calls and onboardings get credited to you. This is shared with the whole BD team.</p>
-    <label>Your name</label>
-    <input id="bd_name" placeholder="e.g. Rohan Shah">
-    <label>Your email</label>
-    <input id="bd_email" type="email" placeholder="rohan@digidr.com">
+<div class="modal-bg active" id="bdModal">
+  <div class="login-aurora" aria-hidden="true"></div>
+  <img class="login-logo" src="https://storage.googleapis.com/digidr/logo.png" alt="DigiDr">
+  <div class="login-title">Business Development Tracker</div>
+  <div class="login-sub">Doctor onboarding, follow-ups &amp; daily call register</div>
+  <form class="modal" method="post" action="#" novalidate onsubmit="event.preventDefault(); doLogin();">
+    <h3>Sign in</h3>
+    <p>Use the email and password your admin gave you.</p>
+    <label>Email</label>
+    <input id="bd_email" name="email" type="email" autocomplete="username" placeholder="rohan@digidr.com">
     <span class="field-error-msg" id="bd_email_err">Enter a valid email address.</span>
-    <label>Your phone</label>
-    <input id="bd_phone" type="tel">
-    <span class="field-error-msg" id="bd_phone_err">Enter a valid phone number.</span>
-    <button class="btn" style="margin-top:16px;width:100%;" onclick="saveBD()">Continue</button>
-  </div>
+    <label>Password</label>
+    <div style="position:relative;">
+      <input id="bd_password" name="password" type="password" autocomplete="current-password" minlength="6" placeholder="Enter your password"
+             style="padding-right:44px;">
+      <button type="button" id="pwToggle" onclick="togglePassword()" aria-label="Show password" title="Show password"
+              style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:0;padding:6px;cursor:pointer;color:#64748b;display:flex;">
+        <svg id="pwEye" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+    <button class="btn" id="loginBtn" type="submit" style="margin-top:16px;width:100%;">Sign in</button>
+  </form>
 </div>
 
 <!-- Edit doctor modal -->
@@ -854,7 +943,8 @@
       </div>
       <div>
         <label>Department / Speciality</label>
-        <select id="e_dept" class="dept-select"></select>
+        <select id="e_dept" class="dept-select" onchange="toggleDeptOther('e')"></select>
+        <input id="e_dept_other" type="text" placeholder="Enter speciality" style="display:none;margin-top:8px;">
       </div>
     </div>
     <div class="row2">
@@ -882,18 +972,19 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/intlTelInput.min.js"></script>
 <script>
 // Deployed Apps Script web app that connects this tracker to the Google Sheet.
-const API_URL = 'https://script.google.com/macros/s/AKfycbwGLK2963WbtKCXZrHqyu8Qk5A8OoBar0oMc0NWwCRuPLrrRYerFLSHRdQKmo7CfiCaGg/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzBokX7Gmu8Ufh-RyWnokRPdh7QlPNwbO1orfB35QI_GNDQgPBoKBe0um1ux7X1UNuwHg/exec';
 // Only needed if TEAM_KEY is set in apps-script/Code.gs; must match it.
 const TEAM_KEY = '';
-const FALLBACK_SHEET_URL = 'https://docs.google.com/spreadsheets/d/17l2AlEBAbRfi8C2c7_QmCpo0cERbKtf-sPKgUf2-s1w/edit';
 
 const DEPTS = ['Cardiology','Dentistry','Urology','Dermatology','Orthopedics','Pediatrics','Gynecology','ENT','General Physician','Neurology','Psychiatry','Ophthalmology','Other'];
 const STATUSES = ['New','Contacted','Onboarded','Not Interested'];
 const CLOSED_STATUSES = ['Onboarded','Not Interested'];
+const ABOUT_DEFAULT_WHAT = "DigiDr builds, manages and maintains a doctor's digital presence across social media, WhatsApp, chatbots and microsites — while enabling continuous patient engagement, seamless appointment management and meaningful growth insights.";
+const ABOUT_DEFAULT_WHY = "Patients have moved online: they search to find, evaluate and connect with doctors, yet many doctors remain disconnected across digital channels. DigiDr bridges this gap, helping a doctor be visible, be accessible and stay connected.";
 const ABOUT_DEFAULT_TIME = 'Onboarding takes just 10–12 minutes';
 
 // Shared data, mirrored from the Sheet. `outbox` holds changes not yet saved to it.
-let db = {doctors:[], calls:[], plan:[], pitch:{}, activity:[], sheetUrl:''};
+let db = {doctors:[], calls:[], plan:[], pitch:{}, activity:[]};
 let outbox = [];
 let currentBD = null;
 let editingId = null;
@@ -929,6 +1020,37 @@ function fillSelect(sel, options, value){
   sel.innerHTML = options.map(o => `<option>${escapeHtml(o)}</option>`).join('');
   setSelect(sel, value);
 }
+// Show/hide the sign-in password.
+function togglePassword(){
+  const inp = document.getElementById('bd_password');
+  const btn = document.getElementById('pwToggle');
+  const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+  btn.title = show ? 'Hide password' : 'Show password';
+  document.getElementById('pwEye').innerHTML = show
+    ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+    : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  inp.focus();
+}
+// "Other" department: show a free-text box and use its value as the speciality.
+function toggleDeptOther(p){
+  const other = document.getElementById(p + '_dept').value === 'Other';
+  const inp = document.getElementById(p + '_dept_other');
+  inp.style.display = other ? '' : 'none';
+  if(other) inp.focus(); else inp.value = '';
+}
+function getDept(p){
+  const v = document.getElementById(p + '_dept').value;
+  return v === 'Other' ? (document.getElementById(p + '_dept_other').value.trim() || 'Other') : v;
+}
+function setDept(p, value){
+  const sel = document.getElementById(p + '_dept');
+  const known = !value || DEPTS.includes(value);
+  sel.value = known ? (value || DEPTS[0]) : 'Other';
+  toggleDeptOther(p);
+  if(!known) document.getElementById(p + '_dept_other').value = value;
+}
 // Sets a select's value, adding the option first if the sheet holds a value not in the list.
 function setSelect(sel, value){
   if(value == null || value === '') return;
@@ -940,10 +1062,12 @@ function setSelect(sel, value){
   sel.value = value;
 }
 
-function closeModal(id){ document.getElementById(id).classList.remove('active'); }
+function closeModal(id){
+  document.getElementById(id).classList.remove('active');
+  if(id === 'bdModal') document.body.classList.remove('signed-out');
+}
 
 // ---------- phone & email inputs ----------
-let bdPhoneIti = null;
 let docMobileIti = null;
 let editMobileIti = null;
 
@@ -1046,6 +1170,9 @@ const saveOutbox = () => lsSet('outbox', outbox);
 
 const getApiUrl = () => API_URL;
 const getTeamKey = () => TEAM_KEY;
+// Sign-in session from the sheet: {token, user: {name, email, phone}}.
+let session = null;
+const getToken = () => session ? session.token : '';
 
 // ---------- Google Sheet sync (Apps Script web app) ----------
 class ApiError extends Error{}
@@ -1056,7 +1183,7 @@ async function api(action, data, url){
   // text/plain body keeps this a "simple" request, so no CORS preflight is needed.
   const res = await fetch(url, {
     method: 'POST',
-    body: JSON.stringify({action, data, key: getTeamKey(), by: currentBD ? currentBD.name : ''})
+    body: JSON.stringify({action, data, key: getTeamKey(), token: getToken()})
   });
   if(!res.ok) throw new Error('HTTP ' + res.status);
   let j;
@@ -1065,6 +1192,8 @@ async function api(action, data, url){
   if(!j.ok){
     const err = new ApiError(j.error || 'Sheet error');
     err.retry = !!j.retry; // sheet was busy (e.g. many people saving at once) — try again later
+    err.auth = !!j.auth;   // session missing/expired/revoked — sign in again
+    if(err.auth && action !== 'login') sessionLost();
     throw err;
   }
   return j.result;
@@ -1098,6 +1227,7 @@ function flushOutbox(){
       try{
         await api(outbox[0].action, outbox[0].data);
       }catch(e){
+        if(e.auth){ setSync('err', pendingText() + ' — sign in to save'); return false; }
         if(e instanceof ApiError && !e.retry){
           // The sheet rejected this change; retrying won't help, so drop it.
           showToast('Sheet rejected a change: ' + e.message);
@@ -1131,6 +1261,7 @@ async function refreshFromSheet(silent){
     renderSheetLog();
     return;
   }
+  if(!session){ setSync('err', 'Not signed in'); return; }
   if(refreshing){ refreshQueued = true; return; }
   refreshing = true;
   try{
@@ -1144,7 +1275,7 @@ async function refreshFromSheet(silent){
     if(outbox.length || localWrites !== writesAtStart){ refreshQueued = true; return; }
     db = {
       doctors: r.doctors || [], calls: r.calls || [], plan: r.plan || [],
-      pitch: r.pitch || {}, activity: r.activity || [], sheetUrl: r.sheetUrl || ''
+      pitch: r.pitch || {}, activity: r.activity || []
     };
     saveCache();
     renderAll(true);
@@ -1198,31 +1329,73 @@ function renderBDStrip(){
   document.getElementById('bdWho').innerHTML = currentBD
     ? `Calling as <strong>${escapeHtml(currentBD.name)}</strong> · ${escapeHtml(currentBD.email || 'no email')} · ${escapeHtml(currentBD.phone)}`
     : 'No BD signed in';
-  document.getElementById('bdBtn').textContent = currentBD ? 'Switch user' : 'Sign in';
+  document.getElementById('bdBtn').textContent = currentBD ? 'Log out' : 'Sign in';
 }
 function openBDModal(){
   document.getElementById('bdModal').classList.add('active');
-  if(!bdPhoneIti) bdPhoneIti = setupPhoneInput(document.getElementById('bd_phone'));
-  if(currentBD){
-    document.getElementById('bd_name').value = currentBD.name;
-    document.getElementById('bd_email').value = currentBD.email;
-    setPhone(bdPhoneIti, document.getElementById('bd_phone'), currentBD.phone);
+  document.body.classList.add('signed-out');
+  if(currentBD) document.getElementById('bd_email').value = currentBD.email || '';
+  setTimeout(() => document.getElementById(document.getElementById('bd_email').value ? 'bd_password' : 'bd_email').focus(), 50);
+}
+function bdButton(){ if(session) logout(); else openBDModal(); }
+
+async function doLogin(){
+  const emailEl = document.getElementById('bd_email');
+  const email = emailEl.value.trim().toLowerCase();
+  const password = document.getElementById('bd_password').value;
+  if(!email || !validateEmail(emailEl, true)){ showToast('Enter your email'); return; }
+  if(password.length < 6){ showToast('Password must be at least 6 characters'); return; }
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="ecg-loader"><svg viewBox="0 0 34 16" aria-hidden="true"><path d="M1 8h8l3-6 4 12 3-6h14"/></svg><span>Authenticating…</span></span>';
+  try{
+    const r = await api('login', {email, password});
+    // Pending changes or cached data from a different BD must not carry over.
+    const prev = lsGet('lastEmail', '');
+    if(prev && prev !== r.user.email){ outbox = []; saveOutbox(); clearData(); }
+    lsSet('lastEmail', r.user.email);
+    setSession(r);
+    closeModal('bdModal');
+    renderBDStrip();
+    renderAll();
+    showToast('Signed in as ' + r.user.name);
+    refreshFromSheet();
+  }catch(e){
+    showToast(e instanceof ApiError ? e.message : 'Could not reach the sheet. Check your connection.');
+  }finally{
+    btn.disabled = false; btn.textContent = 'Sign in';
   }
 }
-function saveBD(){
-  const name = document.getElementById('bd_name').value.trim();
-  const emailEl = document.getElementById('bd_email');
-  const phoneEl = document.getElementById('bd_phone');
-  if(!name){ showToast('Please enter your name'); return; }
-  const emailOk = validateEmail(emailEl, false);
-  const phoneOk = validatePhone(bdPhoneIti, phoneEl, true);
-  if(!emailOk || !phoneOk){ showToast('Please fix the highlighted fields'); return; }
-  currentBD = {name, email: emailEl.value.trim(), phone: phoneValue(bdPhoneIti, phoneEl)};
-  lsSet('currentBD', currentBD);
-  closeModal('bdModal');
+function setSession(s){
+  session = s;
+  currentBD = s ? s.user : null;
+  lsSet('session', s);
+}
+function clearData(){
+  db = {doctors:[], calls:[], plan:[], pitch:{}, activity:[]};
+  saveCache();
+}
+// The sheet no longer accepts our token (expired, logged out elsewhere, or access removed).
+function sessionLost(){
+  if(!session) return;
+  setSession(null);
+  renderBDStrip();
+  document.getElementById('bd_password').value = '';
+  openBDModal();
+  showToast('Your session ended. Please sign in again.');
+}
+function logout(){
+  if(outbox.length && !confirm(pendingText() + '. Log out anyway and discard them?')) return;
+  const token = getToken();
+  if(token) api('logout', {}).catch(() => {});
+  outbox = []; saveOutbox();
+  setSession(null);
+  clearData();
   renderBDStrip();
   renderAll();
-  showToast('Signed in as ' + name);
+  setSync('err', 'Not signed in');
+  document.getElementById('bd_password').value = '';
+  openBDModal();
 }
 // The tracker only shows the signed-in BD's own doctors, calls, plan notes and activity.
 // Matched by email when both sides have one, otherwise by name.
@@ -1265,7 +1438,7 @@ function saveDoctor(){
   const doc = {
     id: newId('d'),
     name, email, mobile,
-    dept: document.getElementById('f_dept').value,
+    dept: getDept('f'),
     status: document.getElementById('f_status').value,
     followup: document.getElementById('f_followup').value,
     remarks: document.getElementById('f_remarks').value.trim(),
@@ -1279,7 +1452,7 @@ function saveDoctor(){
   ['f_name','f_email','f_mobile','f_remarks','f_followup'].forEach(id => document.getElementById(id).value = '');
   clearPhoneError(mobileEl);
   emailEl.classList.remove('error');
-  document.getElementById('f_dept').value = DEPTS[0];
+  setDept('f', DEPTS[0]);
   document.getElementById('f_status').value = STATUSES[0];
   showToast('Doctor saved');
   renderAll();
@@ -1323,7 +1496,7 @@ function openEdit(id){
   document.getElementById('e_email').value = d.email || '';
   validateEmail(document.getElementById('e_email'), false);
   setPhone(editMobileIti, document.getElementById('e_mobile'), d.mobile);
-  setSelect(document.getElementById('e_dept'), d.dept || DEPTS[0]);
+  setDept('e', d.dept);
   setSelect(document.getElementById('e_status'), d.status || STATUSES[0]);
   document.getElementById('e_followup').value = d.followup || '';
   document.getElementById('e_remarks').value = d.remarks || '';
@@ -1343,7 +1516,7 @@ function saveEdit(){
     name,
     email: emailEl.value.trim(),
     mobile: phoneValue(editMobileIti, mobileEl),
-    dept: document.getElementById('e_dept').value,
+    dept: getDept('e'),
     status: document.getElementById('e_status').value,
     followup: document.getElementById('e_followup').value,
     remarks: document.getElementById('e_remarks').value.trim()
@@ -1641,8 +1814,8 @@ function renderAbout(){
     el.textContent = value || placeholder;
     el.classList.toggle('placeholder-text', !value);
   };
-  setText('ab_what_view', p.what, 'To be filled — one or two lines on what DigiDr\'s AI infrastructure for doctors actually is.');
-  setText('ab_why_view', p.why, 'To be filled — the benefits a doctor gets from this AI infrastructure.');
+  setText('ab_what_view', p.what || ABOUT_DEFAULT_WHAT, '');
+  setText('ab_why_view', p.why || ABOUT_DEFAULT_WHY, '');
   setText('ab_script_view', p.script, 'To be filled — the exact opening line to use on a cold call.');
 
   const steps = pitchSteps(p);
@@ -1701,21 +1874,60 @@ function saveAbout(){
   document.getElementById('filterStatus').innerHTML += STATUSES.map(s => `<option>${escapeHtml(s)}</option>`).join('');
 
   docMobileIti = setupPhoneInput(document.getElementById('f_mobile'));
-  ['f_email','bd_email','e_email'].forEach(id =>
+  ['f_email','e_email'].forEach(id =>
     document.getElementById(id).addEventListener('blur', function(){ validateEmail(this, false); }));
 
   // Show the last copy instantly, then load fresh data from the sheet.
   db = Object.assign(db, lsGet('cache', {}));
   outbox = lsGet('outbox', []);
-  currentBD = lsGet('currentBD', null);
+  session = lsGet('session', null);
+  currentBD = session ? session.user : null;
+  try{ localStorage.removeItem('digidr_currentBD'); }catch(e){} // old self-typed sign-in
 
   renderBDStrip();
   renderAll();
-  if(!currentBD) openBDModal();
+  if(!session) openBDModal(); else closeModal('bdModal');
   refreshFromSheet(true);
 
   // Keep everyone's screens current, and retry unsaved changes.
   setInterval(() => { if(document.visibilityState === 'visible') refreshFromSheet(true); }, 60000);
+
+  // Detect new deployments: every 2 minutes (and when the tab regains focus) re-fetch this page
+  // and compare it with the copy first seen. If it changed, show a banner with a Refresh button —
+  // the user decides when to reload.
+  let baseline = null, updatePending = false;
+  async function pageFingerprint(){
+    const res = await fetch(location.pathname + '?_v=' + Date.now(), {cache: 'no-store'});
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    return text.length + ':' + [...text].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7);
+  }
+  async function checkForUpdate(){
+    if(updatePending) return;
+    try{
+      const fp = await pageFingerprint();
+      if(baseline === null){ baseline = fp; return; }
+      if(fp === baseline) return;
+      updatePending = true;
+      showUpdateBanner();
+    }catch(e){ /* offline or fetch blocked (e.g. file://) — try again next time */ }
+  }
+  function showUpdateBanner(){
+    const bar = document.createElement('div');
+    bar.style.cssText = 'position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:9999;' +
+      'display:flex;align-items:center;gap:12px;max-width:calc(100% - 32px);padding:10px 12px 10px 16px;' +
+      'background:#0f172a;color:#fff;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.25);font-size:14px;';
+    bar.innerHTML = '<span>A new version of the app is available.</span>' +
+      '<button style="background:#2563eb;color:#fff;border:0;border-radius:6px;padding:6px 14px;font-weight:600;cursor:pointer;">Refresh</button>';
+    bar.querySelector('button').onclick = () => {
+      if(outbox.length && !confirm(pendingText() + '. They are kept on this device and will sync after refresh. Refresh now?')) return;
+      location.reload();
+    };
+    document.body.appendChild(bar);
+  }
+  checkForUpdate();
+  setInterval(checkForUpdate, 2*60*1000);
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') checkForUpdate(); });
   window.addEventListener('online', () => refreshFromSheet(true));
   document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') refreshFromSheet(true); });
 })();

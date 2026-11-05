@@ -6,13 +6,23 @@ The tracker reads and writes the Google Sheet through a small Apps Script web ap
 2. Delete the placeholder code. Paste in the whole of [Code.gs](Code.gs) and save.
 3. Optional: set `TEAM_KEY` at the top of the script to a shared password. Anyone using the app will need it.
 4. In the function dropdown, pick **setup** and click **Run**. Approve the permissions when asked.
-   - This creates the tabs `Doctors`, `Calls`, `Plan`, `Pitch` and `Activity`.
+   - This creates the tabs `Doctors`, `Calls`, `Plan`, `Pitch`, `Activity`, `Users` and `Sessions`.
    - It also imports any existing Google Form responses.
 5. Click **Deploy → New deployment**. Choose **Web app** and set:
    - Execute as: **Me**
    - Who has access: **Anyone**
 6. Click **Deploy** and copy the **Web app URL**. It ends in `/exec`.
 7. In the tracker, set `API_URL` near the top of the script in `digidr-bd-tracker.html` to that URL (and `TEAM_KEY` if you set one).
+
+## Managing who can sign in
+
+Only people listed in the `Users` tab can use the tracker. Each BD sees only their own doctors, calls, plan and activity. To see everyone's data, open the Sheet itself.
+
+- **Add a BD:** fill in `email`, `name` and `phone`, set `active` to `Y`, and and type their password (at least 6 characters) in the `password` column. The password stays visible in the Sheet, so only share the Sheet with admins. Send the BD their password privately.
+- **Reset a password:** type a new one in the `password` cell.
+- **Remove a BD:** set `active` to `N`. They're signed out on their next action.
+- After 5 wrong passwords, that email is locked for 15 minutes.
+- Don't edit the `Sessions` tab.
 
 **After editing Code.gs**, go to **Deploy → Manage deployments → Edit → Version: New version → Deploy**. This keeps the same URL.
 
